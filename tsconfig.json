@@ -1,0 +1,12 @@
+{
+    "include": ["./*"],
+    "exclude": [],
+    "compilerOptions": {
+        "target": "ES6",
+        "removeComments": true,
+        "noEmitOnError": true,
+        "alwaysStrict": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true
+    }
+}
