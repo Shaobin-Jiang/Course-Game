@@ -1,4 +1,5 @@
 import {Component} from './component/component';
+import { Game } from './game';
 import {Offset, Rect} from './geometry';
 
 import './renderer.css';
@@ -27,6 +28,11 @@ export class Renderer {
         this.front_buffer_canvas.addEventListener('mouseup', this.button_up_event_listener);
         document.addEventListener('mouseup', this.button_up_event_listener);
         document.addEventListener('mousemove', this.button_move_event_listener);
+
+        // Add game event listeners
+        Game.on('set-cursor', (cursor: string) => {
+            this.front_buffer_canvas.style.cursor = cursor;
+        });
     }
 
     // Parent of all canvas elements, created within the parent element passed into the constructor
