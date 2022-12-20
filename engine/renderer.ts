@@ -150,6 +150,12 @@ export class Renderer {
      * @param freeze Whether the draw_call should be called again in a new frame
      */
     public draw(component: Component, freeze: boolean = true): void {
+        // There are certain components that definitely need to be unfrozen, but the user might be careless and forget 
+        // to set `freeze` to `false` here when calling the `draw` method, so if the component has `prevent_freeze`
+        // evaluating to `true`, the renderer will take care of unfreezing the component
+        if (component.prevent_freeze) {
+            freeze = false;
+        }
         this.backup_draw_call_list.push({component, freeze});
     }
 
