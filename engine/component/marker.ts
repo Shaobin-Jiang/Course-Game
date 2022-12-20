@@ -22,6 +22,9 @@ export class Marker extends Img {
     private period: number = 2000; // In milliseconds
     private start_time: number = -1;
 
+    // Unfreeeze the component
+    public prevent_freeze: boolean = true;
+
     public draw(canvas: HTMLCanvasElement, canvas_rect: Rect, event: GameEvent): void {
         let context: CanvasRenderingContext2D = canvas.getContext('2d');
 

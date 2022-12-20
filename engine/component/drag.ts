@@ -49,6 +49,9 @@ export class Drag extends Img {
     // Indicator of the button state in the last frame; useful for detecting change of button status
     private last_draw_button_status: number = -1;
 
+    // Unfreeeze the component
+    public prevent_freeze: boolean = true;
+
     // Whether to restore the component to its original position upon button up; priority lower than `absorb`
     // That is, if the component can stick to the center of a target area, it will stay there instead of returning to
     // the origin position
