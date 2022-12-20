@@ -32,7 +32,7 @@ export class Marker extends Img {
             this.start_time = performance.now();
         }
 
-        let previous_global_alpha = context.globalAlpha;
+        context.save();
 
         if (this.flash) {
             let now: number = performance.now();
@@ -42,6 +42,6 @@ export class Marker extends Img {
 
         super.draw(canvas, canvas_rect, event);
 
-        context.globalAlpha = previous_global_alpha;
+        context.restore();
     }
 }
