@@ -1,5 +1,5 @@
 import {Component} from './component/component';
-import { Game } from './game';
+import {Game} from './game';
 import {Offset, Rect} from './geometry';
 
 import './renderer.css';
@@ -31,7 +31,13 @@ export class Renderer {
 
         // Add game event listeners
         Game.on('set-cursor', (cursor: string) => {
-            this.front_buffer_canvas.style.cursor = cursor;
+            if (!this.cursor_is_set) {
+                this.front_buffer_canvas.style.cursor = cursor;
+
+                if (cursor == 'pointer') {
+                    this.cursor_is_set = true;
+                }
+            }
         });
     }
 
@@ -58,6 +64,9 @@ export class Renderer {
     // Game event to be passed to the draw call functions
     private event: GameEvent = new GameEvent();
 
+    // If this value is `true`, further attempts to modify the cursor shape via a `set-cursor` event would not take effect
+    private cursor_is_set: boolean = false;
+
     // Event listeners
     private button_down_event_listener: EventListener = (event: MouseEvent) => {
         if (this.event.button == -1) {
@@ -66,7 +75,9 @@ export class Renderer {
     };
     private button_move_event_listener: EventListener = (event: MouseEvent) => {
         let canvas_rect: DOMRect = this.front_buffer_canvas.getBoundingClientRect();
-        this.event.position = new Offset(event.clientX - canvas_rect.x, event.clientY - canvas_rect.y).divide(this.ratio);
+        this.event.position = new Offset(event.clientX - canvas_rect.x, event.clientY - canvas_rect.y).divide(
+            this.ratio
+        );
     };
     private button_up_event_listener: EventListener = (event: MouseEvent) => {
         if (event.button == this.event.button) {
@@ -106,6 +117,9 @@ export class Renderer {
     }
 
     private frame(): void {
+        // Restore cursor state
+        this.cursor_is_set = false;
+
         // Clear back buffer
         this.clear_buffer(this.back_buffer);
 
@@ -150,7 +164,7 @@ export class Renderer {
      * @param freeze Whether the draw_call should be called again in a new frame
      */
     public draw(component: Component, freeze: boolean = true): void {
-        // There are certain components that definitely need to be unfrozen, but the user might be careless and forget 
+        // There are certain components that definitely need to be unfrozen, but the user might be careless and forget
         // to set `freeze` to `false` here when calling the `draw` method, so if the component has `prevent_freeze`
         // evaluating to `true`, the renderer will take care of unfreezing the component
         if (component.prevent_freeze) {
