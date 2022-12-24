@@ -60,4 +60,8 @@ export class Rect {
     public copy(): Rect {
         return new Rect(this.x, this.y, this.width, this.height);
     }
+
+    public spread(): [number, number, number, number] {
+        return [this.x, this.y, this.width, this.height];
+    }
 }
