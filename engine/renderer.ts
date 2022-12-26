@@ -39,6 +39,11 @@ export class Renderer {
                 }
             }
         });
+
+        // Disable context menu
+        window.addEventListener('contextmenu', (e: MouseEvent) => {
+            e.preventDefault();
+        })
     }
 
     // Parent of all canvas elements, created within the parent element passed into the constructor
