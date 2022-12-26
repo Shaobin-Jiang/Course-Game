@@ -1,0 +1,20 @@
+.cg-component-dialog-text-renderer {
+    align-items: center;
+    cursor: default;
+    display: flex;
+    font-size: 64px;
+    height: 516px;
+    overflow: hidden;
+    position: absolute;
+    transform-origin: left top;
+    user-select: none;
+    width: 1258px;
+}
+
+.cg-component-dialog-text-renderer p {
+    display: -webkit-box;
+    margin: 0;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 6;
+}
