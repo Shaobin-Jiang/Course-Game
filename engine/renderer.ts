@@ -43,7 +43,7 @@ export class Renderer {
         // Disable context menu
         window.addEventListener('contextmenu', (e: MouseEvent) => {
             e.preventDefault();
-        })
+        });
     }
 
     // Parent of all canvas elements, created within the parent element passed into the constructor
@@ -71,6 +71,9 @@ export class Renderer {
 
     // If this value is `true`, further attempts to modify the cursor shape via a `set-cursor` event would not take effect
     private cursor_is_set: boolean = false;
+
+    // If `true`, then even the frozen content has to be drawn again; normally that would happen when the renderer is resized
+    private should_redraw: boolean = false;
 
     // Event listeners
     private button_down_event_listener: EventListener = (event: MouseEvent) => {
@@ -128,6 +131,25 @@ export class Renderer {
         // Clear back buffer
         this.clear_buffer(this.back_buffer);
 
+        // If necessary, draw the frozen content again
+        if (this.should_redraw) {
+            for (let draw_call of this.draw_call_list) {
+                if (draw_call.freeze) {
+                    draw_call.component.draw(
+                        this.back_buffer_canvas,
+                        new Rect(0, 0, this.width, this.height),
+                        this.event
+                    );
+                }
+            }
+
+            // Get the content from the backup buffer and save it to the frozen_content property
+            this.frozen_content = this.back_buffer.getImageData(0, 0, this.width, this.height);
+            this.clear_buffer(this.back_buffer);
+
+            this.should_redraw = false;
+        }
+
         if (this.frozen_content != null) {
             this.back_buffer.putImageData(this.frozen_content, 0, 0);
         }
@@ -144,6 +166,14 @@ export class Renderer {
 
         // Update frame
         this.animationFrameRequestId = window.requestAnimationFrame(this.frame.bind(this));
+    }
+
+    // Useful when resizing the renderer midway
+    public setHeight(height: number): void {
+        this.ratio = height / this.height;
+        this.parent.style.width = `${(height / this.height) * this.width}px`;
+        this.parent.style.height = `${height}px`;
+        this.should_redraw = true;
     }
 
     /**
