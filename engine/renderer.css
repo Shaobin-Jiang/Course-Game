@@ -1,6 +1,6 @@
 /* Wrapper of the renderer canvases */
 .cg-renderer-wrapper {
-    position: absolute;
+    position: relative;
 }
 
 /* Renderer canvases */
