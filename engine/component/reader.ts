@@ -150,6 +150,10 @@ export class Reader extends Component {
             context.restore();
 
             this.last_draw_button_status = event.button;
+            
+            if (this.progress >= 0.95) {
+                this.has_reached_bottom = true;
+            }
         }
     }
 
