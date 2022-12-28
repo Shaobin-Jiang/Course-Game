@@ -35,7 +35,7 @@ export class Select extends Button {
 
     private foreground_rect: Rect;
 
-    private selected: boolean = false;
+    public selected: boolean = false;
 
     public onclick: Function = () => {
         this.selected = !this.selected;
