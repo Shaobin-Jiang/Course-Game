@@ -55,12 +55,14 @@ export class Timer extends Component {
         context.save();
 
         context.fillStyle = '#252525';
+        context.globalAlpha = 0.6;
         context.fillRect(...this.rect.spread());
 
         context.textAlign = 'center';
         context.textBaseline = 'middle';
         context.font = `bold ${this.rect.height / 2}px "Microsoft Yahei"`;
         context.fillStyle = '#A52A2A';
+        context.globalAlpha = 1;
         context.fillText(time_str, this.rect.x + this.rect.width / 2, this.rect.y + this.rect.height / 2);
 
         context.restore();
