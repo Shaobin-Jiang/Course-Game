@@ -1,0 +1,23 @@
+* {
+    margin: 0 0;
+    padding: 0 0;
+}
+
+html {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    background-color: black;
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+}
+
+.cg-game {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+}
