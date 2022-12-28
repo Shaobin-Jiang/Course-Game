@@ -17,13 +17,15 @@ export class Timer extends Component {
 
         // Adjust component rect; aspect ratio is 3 : 1
         if (this.rect.width < 0) {
-            this.rect.width = this.rect.height * 3;
+            this.rect.width = this.rect.height * Timer.aspect_ratio;
         } else {
-            this.rect.height = this.rect.width / 3;
+            this.rect.height = this.rect.width / Timer.aspect_ratio;
         }
 
         this.time = this.initial_time;
     }
+
+    static readonly aspect_ratio: number = 3;
 
     private start_time: number = -1;
 
@@ -32,6 +34,7 @@ export class Timer extends Component {
     public get finished(): boolean {
         return this.time == 0;
     }
+
 
     // Unfreeeze the component
     public prevent_freeze: boolean = true;
