@@ -1,17 +1,18 @@
+import {Select} from './component/select';
 import {Button} from './component/button';
 import {Img} from './component/img';
 import {Reader} from './component/reader';
 import {Timer} from './component/timer';
 import {Rect} from './geometry';
 import {Renderer} from './renderer';
+import {loadImage} from './util';
 
 import './game.css';
 
-import BackgroundImage from './images/button-background.png';
+import ButtonBackground from './images/button-background.png';
 import ObjectSelectGrid from './images/object-select-grid.png';
 import ObjectSelectBackground from './images/object-select-background.jpg';
-import {loadImage} from './util';
-import {Select} from './component/select';
+import ModalBackground from './images/modal.png';
 
 export class Game {
     constructor(private parent: HTMLElement = document.body) {
@@ -60,6 +61,15 @@ export class Game {
         this.event_list = [];
     }, 0);
 
+    // Indicator of whether there is an alert modal
+    private is_alert: boolean = false;
+
+    // Assets
+    private button_background: HTMLImageElement | null;
+    private object_select_grid: HTMLImageElement | null;
+    private object_select_background: HTMLImageElement | null;
+    private modal_background: HTMLImageElement | null;
+
     private resize_callback: EventListener = () => {
         if (document.documentElement.clientWidth / document.documentElement.clientHeight > this.width / this.height) {
             this.renderer.setHeight(document.documentElement.clientHeight);
@@ -71,11 +81,6 @@ export class Game {
     public renderer: Renderer;
     public width: number = 3200;
     public height: number = 1800;
-
-    // Assets
-    private button_background: HTMLImageElement | null;
-    private object_select_grid: HTMLImageElement | null;
-    private object_select_background: HTMLImageElement | null;
 
     // Game page: read paper
     public read_paper(background: HTMLImageElement, paper: HTMLImageElement, time: number = 60): void {
@@ -111,14 +116,14 @@ export class Game {
             '#000000',
             '#351500'
         );
-        button.onclick = function () {
+        button.onclick = () => {
             if (!reader.has_reached_bottom) {
-                alert('你需要看完文献的全部内容才能继续游戏~');
+                this.alert('你需要看完文献的全部内容才能继续游戏~');
                 return;
             }
 
             if (!timer.finished) {
-                alert(`你需要至少阅读${time}秒才能继续游戏~`);
+                this.alert(`你需要至少阅读${time}秒才能继续游戏~`);
                 return;
             }
 
@@ -181,7 +186,7 @@ export class Game {
             '#000000',
             '#351500'
         );
-        button.onclick = function () {
+        button.onclick = () =>  {
             let correct: boolean = true;
 
             for (let i = 0; i < 9; i++) {
@@ -197,17 +202,59 @@ export class Game {
                 }
             }
 
-            alert(correct ? '正确' : '错误');
+            this.alert(correct ? '正确' : '错误', correct ? null : null);
         };
         this.renderer.draw(button);
 
         this.renderer.render();
     }
 
+    public alert(msg: string, callback: Function | null = null): void {
+        if (!this.is_alert) {
+            this.is_alert = true;
+
+            let modal: HTMLDivElement = document.createElement('div');
+            modal.className = 'cg-game-alert';
+            this.renderer.parent.appendChild(modal);
+
+            let modal_window: HTMLDivElement = document.createElement('div');
+            modal_window.className = 'cg-game-alert-window';
+            modal.appendChild(modal_window);
+
+            let modal_background: HTMLImageElement = document.createElement('img');
+            modal_background.className = 'cg-game-alert-background';
+            modal_background.src = ModalBackground;
+            modal_window.appendChild(modal_background);
+
+            let modal_text: HTMLDivElement = document.createElement('div');
+            modal_text.className = 'cg-game-alert-text';
+            modal_text.innerText = msg;
+            modal_window.appendChild(modal_text);
+
+            let modal_confirm: HTMLImageElement = document.createElement('img');
+            modal_confirm.className = 'cg-game-alert-confirm';
+            modal_confirm.src = ButtonBackground;
+            modal_window.appendChild(modal_confirm);
+
+            let modal_callback: EventListener = () => {
+                modal_confirm.removeEventListener('click', modal_callback);
+                modal.remove();
+                this.is_alert = false;
+
+                if (callback != null) {
+                    callback();
+                }
+            }
+
+            modal_confirm.addEventListener('click', modal_callback);
+        }
+    }
+
     public async load() {
-        this.button_background = await loadImage(BackgroundImage);
+        this.button_background = await loadImage(ButtonBackground);
         this.object_select_grid = await loadImage(ObjectSelectGrid);
         this.object_select_background = await loadImage(ObjectSelectBackground);
+        this.modal_background = await loadImage(ModalBackground);
     }
 
     public destroy() {
