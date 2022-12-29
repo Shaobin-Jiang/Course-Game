@@ -46,9 +46,6 @@ export class Renderer {
         });
     }
 
-    // Parent of all canvas elements, created within the parent element passed into the constructor
-    private parent: HTMLElement;
-
     // A double buffering mechanism
     private back_buffer_canvas: HTMLCanvasElement;
     private front_buffer_canvas: HTMLCanvasElement;
@@ -167,6 +164,9 @@ export class Renderer {
         // Update frame
         this.animationFrameRequestId = window.requestAnimationFrame(this.frame.bind(this));
     }
+
+    // Parent of all canvas elements, created within the parent element passed into the constructor
+    public readonly parent: HTMLElement;
 
     // Useful when resizing the renderer midway
     public setHeight(height: number): void {
