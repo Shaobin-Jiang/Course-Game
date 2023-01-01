@@ -72,6 +72,9 @@ export class Renderer {
     // If `true`, then even the frozen content has to be drawn again; normally that would happen when the renderer is resized
     private should_redraw: boolean = false;
 
+    // Force freeze any interaction
+    private force_freeze: boolean = false;
+
     // Event listeners
     private button_down_event_listener: EventListener = (event: MouseEvent) => {
         if (this.event.button == -1) {
@@ -128,15 +131,18 @@ export class Renderer {
         // Clear back buffer
         this.clear_buffer(this.back_buffer);
 
+        let event: GameEvent;
+        if (this.force_freeze) {
+            event = {button: -1, position: new Offset(-1, -1), key: ''};
+        } else {
+            event = this.event;
+        }
+
         // If necessary, draw the frozen content again
         if (this.should_redraw) {
             for (let draw_call of this.draw_call_list) {
                 if (draw_call.freeze) {
-                    draw_call.component.draw(
-                        this.back_buffer_canvas,
-                        new Rect(0, 0, this.width, this.height),
-                        this.event
-                    );
+                    draw_call.component.draw(this.back_buffer_canvas, new Rect(0, 0, this.width, this.height), event);
                 }
             }
 
@@ -216,7 +222,9 @@ export class Renderer {
      *
      * The control syntax for what to display in each frame should be added in the passed draw calls.
      */
-    public render(): void {
+    public render(freeze: boolean = false): void {
+        this.force_freeze = freeze;
+
         this.clear();
 
         // Transfer the backup draw call list to the formal draw call list, and clear the backup
