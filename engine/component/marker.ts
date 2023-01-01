@@ -22,11 +22,33 @@ export class Marker extends Img {
     private period: number = 2000; // In milliseconds
     private start_time: number = -1;
 
+    // Mouse state in the last frame
+    private last_draw_button_state: number = -1;
+
+    // Indicate whether the button is being held
+    private button_held: boolean = false;
+
+    public onclick: Function = () => {};
+
     // Unfreeeze the component
     public prevent_freeze: boolean = true;
 
     public draw(canvas: HTMLCanvasElement, canvas_rect: Rect, event: GameEvent): void {
         let context: CanvasRenderingContext2D = canvas.getContext('2d');
+
+        let hover: boolean = event.position.inside(this.rect);
+
+        // Button toggles from being unclicked to clicked
+        if (this.last_draw_button_state == -1 && event.button == 0 && hover) {
+            this.button_held = true;
+        } else if (event.button == -1) {
+            // Button released within the range of the button
+            if (this.button_held && hover) {
+                this.onclick();
+            }
+
+            this.button_held = false;
+        }
 
         if (this.start_time == -1) {
             this.start_time = performance.now();
