@@ -47,9 +47,6 @@ export class Dialog extends Component {
 
     static dialog_text_box: HTMLImageElement | null = null;
 
-    // Aspect ratio of the un-minimized dialog component
-    private aspect_ratio: number = 1.466;
-
     // Rect of the individual parts within the maximized Dialog component
     private text_rect: Rect;
 
@@ -61,6 +58,9 @@ export class Dialog extends Component {
             Dialog.dialog_text_box = image;
         });
     }
+
+    // Aspect ratio of the un-minimized dialog component
+    public readonly aspect_ratio: number = 1.466;
 
     public draw(canvas: HTMLCanvasElement, canvas_rect: Rect, event: GameEvent): void {
         if (Dialog.dialog_text_box == null) {
