@@ -73,6 +73,8 @@ export class Game {
     // Indicator of whether there is an alert modal
     private is_alert: boolean = false;
 
+    private game_progress: Progress | null = null;
+
     // Assets
     private button_background: HTMLImageElement | null;
     private object_select_grid: HTMLImageElement | null;
@@ -89,16 +91,17 @@ export class Game {
         }
     };
 
-    private validate_progress(session_id: number, level_id: number, game_progress: Progress): boolean {
+    private validate_progress(session_id: number, level_id: number): boolean {
         return (
-            game_progress.session > session_id ||
-            (game_progress.session == session_id && game_progress.level >= level_id)
+            this.game_progress.session > session_id ||
+            (this.game_progress.session == session_id && this.game_progress.level >= level_id)
         );
     }
 
     private async update_progress(progress: Progress): Promise<void> {
         return new Promise((resolve, reject) => {
             // TODO: Deal with progress
+            this.game_progress = progress;
             resolve();
         });
     }
@@ -109,9 +112,11 @@ export class Game {
 
     public game_content: Array<Session> = [];
 
-    public pick_session(game_progress: Progress): void {}
+    public pick_session(): void {}
 
-    public pick_level(session_id: number, game_progress: Progress): void {
+    public pick_level(session_id: number): void {
+        let game_progress: Progress = this.game_progress;
+
         if (session_id > game_progress.session) {
             console.error(`current session: ${session_id}\nprogress session: ${game_progress.session}`);
             return;
@@ -132,7 +137,7 @@ export class Game {
         for (let i = 0; i < progress; i++) {
             let marker: Marker = new Marker(session.marker, session.levels[i].position);
             marker.onclick = () => {
-                this.read_paper(session_id, i, game_progress);
+                this.read_paper(session_id, i);
             };
             this.renderer.draw(marker);
         }
@@ -141,20 +146,17 @@ export class Game {
         if (progress != session.levels.length) {
             let marker: Marker = new Marker(session.marker, session.levels[progress].position, true);
             marker.onclick = () => {
-                this.read_paper(session_id, progress, game_progress);
+                this.read_paper(session_id, progress);
             };
             this.renderer.draw(marker);
         }
     }
 
     // Game page: read paper
-    public read_paper(
-        session_id: number,
-        level_id: number,
-        game_progress: Progress,
-        read_time: number | null = null
-    ): void {
-        if (!this.validate_progress(session_id, level_id, game_progress)) {
+    public read_paper(session_id: number, level_id: number, read_time: number | null = null): void {
+        let game_progress: Progress = this.game_progress;
+
+        if (!this.validate_progress(session_id, level_id)) {
             console.error(
                 `requested session: ${session_id}, level: ${level_id}\nprogress session: ${game_progress.session}, level: ${game_progress.level}`
             );
@@ -219,15 +221,17 @@ export class Game {
                 return;
             }
 
-            this.prompt_object_selection(session_id, level_id, game_progress);
+            this.prompt_object_selection(session_id, level_id);
         };
         this.renderer.draw(button);
 
         this.renderer.render();
     }
 
-    public prompt_object_selection(session_id: number, level_id: number, game_progress: Progress): void {
-        if (!this.validate_progress(session_id, level_id, game_progress)) {
+    public prompt_object_selection(session_id: number, level_id: number): void {
+        let game_progress: Progress = this.game_progress;
+
+        if (!this.validate_progress(session_id, level_id)) {
             console.error(
                 `requested session: ${session_id}, level: ${level_id}\nprogress session: ${game_progress.session}, level: ${game_progress.level}`
             );
@@ -240,14 +244,16 @@ export class Game {
         );
 
         this.alert(this.game_content[session_id].levels[level_id].prompt, () => {
-            this.select_object(session_id, level_id, game_progress);
+            this.select_object(session_id, level_id);
         });
 
         this.renderer.render();
     }
 
-    public select_object(session_id: number, level_id: number, game_progress: Progress): void {
-        if (!this.validate_progress(session_id, level_id, game_progress)) {
+    public select_object(session_id: number, level_id: number): void {
+        let game_progress: Progress = this.game_progress;
+
+        if (!this.validate_progress(session_id, level_id)) {
             console.error(
                 `requested session: ${session_id}, level: ${level_id}\nprogress session: ${game_progress.session}, level: ${game_progress.level}`
             );
@@ -319,7 +325,7 @@ export class Game {
                     scene_id = game_progress.scene;
                 }
 
-                this.play_scene(session_id, level_id, scene_id, game_progress);
+                this.play_scene(session_id, level_id, scene_id);
             } else {
                 this.alert('选择错误，请重新选择~');
             }
@@ -329,8 +335,10 @@ export class Game {
         this.renderer.render();
     }
 
-    public play_scene(session_id: number, level_id: number, scene_id: number, game_progress: Progress): void {
-        if (!this.validate_progress(session_id, level_id, game_progress)) {
+    public play_scene(session_id: number, level_id: number, scene_id: number): void {
+        let game_progress: Progress = this.game_progress;
+
+        if (!this.validate_progress(session_id, level_id)) {
             console.error(
                 `requested session: ${session_id}, level: ${level_id}\nprogress session: ${game_progress.session}, level: ${game_progress.level}`
             );
@@ -429,18 +437,20 @@ export class Game {
                                 promise = this.update_progress(progress);
                             } else {
                                 progress = game_progress;
-                                promise = new Promise((resolve, reject) => {
-                                    setTimeout(() => {resolve();}, 0);
-                                })
+                                promise = new Promise((resolve) => {
+                                    setTimeout(() => {
+                                        resolve();
+                                    }, 0);
+                                });
                             }
 
                             promise.then(() => {
                                 if (level_id == 0) {
-                                    this.pick_session(progress);
+                                    this.pick_session();
                                 } else if (scene_id == 0) {
-                                    this.pick_level(session_id, progress);
+                                    this.pick_level(session_id);
                                 } else {
-                                    this.play_scene(session_id, level_id, scene_id, progress);
+                                    this.play_scene(session_id, level_id, scene_id);
                                 }
                             });
                         });
@@ -448,7 +458,7 @@ export class Game {
                         if (is_replaying) {
                             // Repeat
                             this.alert('太遗憾了，你的操作是错误的！<br>请再试试吧！', () => {
-                                this.play_scene(session_id, level_id, scene_id, game_progress);
+                                this.play_scene(session_id, level_id, scene_id);
                             });
                         } else {
                             let progress: Progress = {
@@ -457,8 +467,10 @@ export class Game {
                                 scene: Math.floor(scene_id) + 0.5,
                             };
 
-                            this.alert('太遗憾了，你的操作是错误的！<br>回到文献中再看看吧！', () => {
-                                this.read_paper(session_id, level_id, progress);
+                            this.update_progress(progress).then(() => {
+                                this.alert('太遗憾了，你的操作是错误的！<br>回到文献中再看看吧！', () => {
+                                    this.read_paper(session_id, level_id);
+                                });
                             });
                         }
                     }
