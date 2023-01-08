@@ -31,7 +31,7 @@ export class Dialog extends Component {
         this.text_element.innerHTML = `<p>${this.content}</p>`;
         this.text_element.classList.add('cg-component-dialog-text-renderer');
 
-        if (this.rect.height < 0 || (this.rect.width > 0 && this, rect.height > 0)) {
+        if (this.rect.height < 0 || (this.rect.width > 0 && this.rect.height > 0)) {
             this.rect.height = this.rect.width / this.aspect_ratio;
         } else {
             this.rect.width = this.rect.height * this.aspect_ratio;
