@@ -55,7 +55,17 @@ export class Offset {
 }
 
 export class Rect {
-    constructor(public x: number, public y: number, public width: number, public height: number) {}
+    constructor(x: number, y: number, width: number, height: number, private scale: number = 1) {
+        this.x = x * this.scale;
+        this.y = y * this.scale;
+        this.width = width * this.scale;
+        this.height = height * this.scale;
+    }
+
+    public x: number;
+    public y: number;
+    public width: number;
+    public height: number;
 
     public copy(): Rect {
         return new Rect(this.x, this.y, this.width, this.height);
