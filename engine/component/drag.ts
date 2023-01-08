@@ -8,6 +8,8 @@ export class Drag extends Img {
      *
      * @param image The content image of the component
      * @param rect The rect of the component
+     * @param restore_position_upon_loose Whether to restore the component to its original position upon button up;
+     * priority lower than `absorb`
      * @param target_area Target area that is highlighted when the drag component moves into them
      * @param absorb Whether the component should be absorbed to the target area when released; higher priority than
      * `restore_position_upon_loose`
@@ -15,6 +17,7 @@ export class Drag extends Img {
     constructor(
         image: HTMLImageElement,
         rect: Rect,
+        private restore_position_upon_loose: boolean = false,
         private target_area: Array<Rect> | Rect | null = null,
         private absorb: boolean = false
     ) {
@@ -51,11 +54,6 @@ export class Drag extends Img {
 
     // Unfreeeze the component
     public prevent_freeze: boolean = true;
-
-    // Whether to restore the component to its original position upon button up; priority lower than `absorb`
-    // That is, if the component can stick to the center of a target area, it will stay there instead of returning to
-    // the origin position
-    public restore_position_upon_loose = false;
 
     // Indicator of where the component; -1 indicates it is not in any target area
     public whereabout: number = -1;
