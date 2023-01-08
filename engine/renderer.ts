@@ -159,7 +159,7 @@ export class Renderer {
 
         for (let draw_call of this.draw_call_list) {
             if (!draw_call.freeze) {
-                draw_call.component.draw(this.back_buffer_canvas, new Rect(0, 0, this.width, this.height), this.event);
+                draw_call.component.draw(this.back_buffer_canvas, new Rect(0, 0, this.width, this.height), event);
             }
         }
 
