@@ -115,10 +115,8 @@ export class Button extends Component {
         // If button has focus, change opacity
         if ((hover && event.button != 0) || this.button_held) {
             context.globalAlpha = 0.6;
-            Game.message('set-cursor', 'pointer');
         } else {
             context.globalAlpha = 1;
-            Game.message('set-cursor', 'default');
         }
 
         this.draw_border(context);
