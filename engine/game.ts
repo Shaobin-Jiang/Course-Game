@@ -24,7 +24,7 @@ import Speaker from './images/speaker.png';
 import PlayBar from './images/play-bar.png';
 
 export class Game {
-    constructor(private parent: HTMLElement = document.body) {
+    constructor(private course: Course, private parent: HTMLElement = document.body) {
         this.parent.classList.add('cg-game');
 
         let scale: number;
@@ -73,7 +73,8 @@ export class Game {
     // Indicator of whether there is an alert modal
     private is_alert: boolean = false;
 
-    private game_progress: Progress | null = null;
+    // TODO: change this property back to private when finished with debugging
+    public game_progress: Progress | null = null;
 
     // Assets
     private button_background: HTMLImageElement | null;
@@ -98,6 +99,13 @@ export class Game {
         );
     }
 
+    private async get_session_content(url: string): Promise<Session> {
+        // TODO: implement this properly
+        return new Promise((resolve) => {
+            resolve(new Object() as Session);
+        });
+    }
+
     private async update_progress(progress: Progress): Promise<void> {
         return new Promise((resolve, reject) => {
             // TODO: Deal with progress
@@ -110,9 +118,49 @@ export class Game {
     public width: number = 3200;
     public height: number = 1800;
 
-    public game_content: Array<Session> = [];
+    public game_content: Array<Session> = new Array(this.course.sessions.length);
 
-    public pick_session(): void {}
+    public pick_session(): void {
+        this.renderer.draw(new Img(this.course.map, new Rect(0, 0, this.width, this.height)));
+
+        for (let i = 0; i <= this.game_progress.session; i++) {
+            let marker: Marker;
+            if (i < this.game_progress.session) {
+                marker = new Marker(this.course.finished_marker, this.course.sessions[i].position);
+            } else {
+                if (this.game_progress.session < this.course.sessions.length) {
+                    marker = new Marker(this.course.unfinished_marker, this.course.sessions[i].position);
+                } else {
+                    continue;
+                }
+            }
+
+            marker.onclick = () => {
+                if (typeof this.game_content[i] == 'undefined') {
+                    let get_session_promise: Promise<Session>;
+                    let session: string | Session = this.course.sessions[i].get;
+
+                    if (typeof session == 'string') {
+                        get_session_promise = this.get_session_content(session);
+                    } else {
+                        get_session_promise = new Promise((resolve) => {
+                            resolve(session as Session);
+                        });
+                    }
+
+                    get_session_promise.then((s: Session) => {
+                        this.game_content[i] = s;
+                        this.pick_level(i);
+                    });
+                } else {
+                    this.pick_level(i);
+                }
+            };
+            this.renderer.draw(marker);
+        }
+
+        this.renderer.render();
+    }
 
     public pick_level(session_id: number): void {
         let game_progress: Progress = this.game_progress;
@@ -150,6 +198,8 @@ export class Game {
             };
             this.renderer.draw(marker);
         }
+
+        this.renderer.render();
     }
 
     // Game page: read paper
@@ -166,7 +216,7 @@ export class Game {
         let session: Session = this.game_content[session_id];
         let level: Level = session.levels[level_id];
 
-        this.renderer.draw(new Img(session.map, new Rect(0, 0, this.width, this.height)));
+        this.renderer.draw(new Img(session.background, new Rect(0, 0, this.width, this.height)));
 
         let reader: Reader = new Reader(
             level.paper,
@@ -180,7 +230,8 @@ export class Game {
             if (game_progress.session > session_id || game_progress.level > level_id) {
                 time = 20;
             } else {
-                time = 60;
+                // TODO: reset this to 60 when finished with debugging
+                time = 1;
             }
         } else {
             time = read_time;
@@ -243,9 +294,13 @@ export class Game {
             new Img(this.speaker, new Rect(this.height / 6, this.height / 3, this.height / 3, this.height / 3))
         );
 
-        this.alert(this.game_content[session_id].levels[level_id].prompt, () => {
-            this.select_object(session_id, level_id);
-        });
+        this.alert(
+            this.game_content[session_id].levels[level_id].prompt,
+            () => {
+                this.select_object(session_id, level_id);
+            },
+            false
+        );
 
         this.renderer.render();
     }
@@ -367,7 +422,9 @@ export class Game {
             new Fill(new Rect(this.width * 0.125, this.height * 0.15, this.width * 0.75, this.height * 0.7))
         );
 
-        for (let component of scene.layout) {
+        let layout: Array<Component> = scene.layout();
+
+        for (let component of layout) {
             this.renderer.draw(component);
         }
 
@@ -384,7 +441,10 @@ export class Game {
 
         let timer: Timer;
         if (!is_replaying) {
-            timer = new Timer(first_attempt ? 20 : 5, new Rect(0, 0, -1, this.height / 10));
+            timer = new Timer(
+                first_attempt ? 10 : 5,
+                new Rect(this.width * 0.14, this.height * 0.045, -1, this.height * 0.065)
+            );
             this.renderer.draw(timer);
         }
 
@@ -402,7 +462,20 @@ export class Game {
                     new Fill(new Rect(this.width * 0.125, this.height * 0.15, this.width * 0.75, this.height * 0.7))
                 );
 
-                for (let component of scene.layout) {
+                let prompt_button: Button = new Button(
+                    '查看问题',
+                    new Rect(this.width * 0.14, this.height * 0.045, this.height * 0.195, this.height * 0.065),
+                    this.height * 0.03,
+                    null,
+                    'rgba(0, 0, 0, 0)',
+                    '#000000'
+                );
+                prompt_button.onclick = () => {
+                    this.alert(scene.question);
+                };
+                this.renderer.draw(prompt_button);
+
+                for (let component of layout) {
                     this.renderer.draw(component);
                 }
 
@@ -415,20 +488,28 @@ export class Game {
                     this.button_background
                 );
                 button.onclick = () => {
-                    let correct: boolean = scene.correct_func();
+                    let correct: boolean = scene.correct_func(layout);
 
                     if (correct) {
-                        this.alert('太棒了！操作正确！<br>请接着做后面的实验吧！', () => {
-                            scene_id++;
-                            if (scene_id >= level.scenes.length) {
-                                scene_id = 0;
-                                level_id++;
-                                if (level_id >= session.levels.length) {
-                                    level_id = 0;
-                                    session_id++;
-                                }
-                            }
+                        scene_id++;
 
+                        if (scene_id >= level.scenes.length) {
+                            scene_id = 0;
+                            level_id++;
+                            if (level_id >= session.levels.length) {
+                                level_id = 0;
+                                session_id++;
+                            }
+                        }
+
+                        let alert_text: string;
+                        if (level_id == 0) {
+                            alert_text = '已完成本章全部关卡！';
+                        } else {
+                            alert_text = '太棒了！操作正确！<br>请接着做后面的实验吧！';
+                        }
+
+                        this.alert(alert_text, () => {
                             let progress: Progress;
 
                             let promise: Promise<void>;
@@ -438,9 +519,7 @@ export class Game {
                             } else {
                                 progress = game_progress;
                                 promise = new Promise((resolve) => {
-                                    setTimeout(() => {
-                                        resolve();
-                                    }, 0);
+                                    resolve();
                                 });
                             }
 
@@ -478,6 +557,8 @@ export class Game {
                 this.renderer.draw(button);
 
                 this.renderer.parent.removeEventListener('click', callback);
+
+                this.renderer.render();
             }
         };
         this.renderer.parent.addEventListener('click', callback);
@@ -486,12 +567,15 @@ export class Game {
         this.renderer.render(true);
     }
 
-    public alert(msg: string, callback: Function | null = null): void {
+    public alert(msg: string, callback: Function | null = null, blur: boolean = true): void {
         if (!this.is_alert) {
             this.is_alert = true;
 
             let modal: HTMLDivElement = document.createElement('div');
             modal.className = 'cg-game-alert';
+            if (blur) {
+                modal.classList.add('cg-game-alert-blur');
+            }
             this.renderer.parent.appendChild(modal);
 
             let modal_window: HTMLDivElement = document.createElement('div');
@@ -541,13 +625,13 @@ export class Game {
     }
 }
 
-type Scene = {
+export type Scene = {
     question: string;
-    layout: Array<Component>;
-    correct_func: () => boolean;
+    layout: () => Array<Component>;
+    correct_func: (components: Array<Component>) => boolean;
 };
 
-type Level = {
+export type Level = {
     position: Rect;
     scenes: Array<Scene>;
     objects: Array<HTMLImageElement>;
@@ -556,14 +640,21 @@ type Level = {
     prompt: string;
 };
 
-type Session = {
+export type Session = {
     map: HTMLImageElement;
     background: HTMLImageElement;
     marker: HTMLImageElement;
     levels: Array<Level>;
 };
 
-type Progress = {
+export type Course = {
+    map: HTMLImageElement;
+    finished_marker: HTMLImageElement;
+    unfinished_marker: HTMLImageElement;
+    sessions: Array<{position: Rect; get: string | Session}>;
+};
+
+export type Progress = {
     session: number;
     level: number;
     scene: number;
