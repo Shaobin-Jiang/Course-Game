@@ -22,6 +22,7 @@ import ObjectSelectBackground from './images/object-select-background.jpg';
 import ModalBackground from './images/modal.png';
 import Speaker from './images/speaker.png';
 import PlayBar from './images/play-bar.png';
+import {Drag} from './component/drag';
 
 export class Game {
     constructor(private course: Course, private parent: HTMLElement = document.body) {
@@ -70,6 +71,126 @@ export class Game {
         this.event_list = [];
     }, 0);
 
+    /**
+     * Parse component based on given object
+     *
+     * Allowed components:
+     * - dialog
+     * - drag
+     * - img
+     * - select
+     *
+     * E.g. pass in an object like this:
+     * { name: 'drag', params: [] }
+     *
+     * For images, use its url instead of a loaded HTMLImageElement object, for the method automatically loads it
+     * For Rect objects, use an array of numerics instead
+     */
+    static async parse_component(obj: AnyObject): Promise<() => Component> {
+        let component: () => Component;
+        let params = (obj.params as Array<any>).slice();
+
+        switch ((obj.name as string).toLowerCase()) {
+            case 'dialog':
+                params[0] = new Rect(...(params[0] as [number, number, number, number]));
+                component = () => new Dialog(params[0], params[1] as string);
+                break;
+            case 'drag':
+                params[0] = await loadImage(params[0] as string);
+                params[1] = new Rect(...(params[1] as [number, number, number, number]));
+                if (params.length >= 4) {
+                    let arr: Array<Rect> = [];
+                    for (let rect of params[3] as Array<[number, number, number, number]>) {
+                        arr.push(new Rect(...rect));
+                    }
+                    params[3] = arr;
+                }
+                component = () => new Drag(...(params as [HTMLImageElement, Rect]));
+                break;
+            case 'img':
+                params[0] = await loadImage(params[0] as string);
+                params[1] = new Rect(...(params[1] as [number, number, number, number]));
+                component = () => new Img(params[0] as HTMLImageElement, params[1] as Rect);
+                break;
+            case 'select':
+                params[0] = new Rect(...(params[0] as [number, number, number, number]));
+                params[1] = await loadImage(params[1] as string);
+                params[2] = await loadImage(params[2] as string);
+                component = () => new Select(params[0], params[1], params[2]);
+                break;
+        }
+
+        return component;
+    }
+
+    static async parse_scene(obj: AnyObject): Promise<Scene> {
+        let scene: AnyObject = {};
+
+        scene.question = obj.question;
+
+        let layout: Array<() => Component> = [];
+        for (let o of obj.layout as Array<AnyObject>) {
+            layout.push(await this.parse_component(o));
+        }
+        scene.layout = () => {
+            let l: Array<Component> = [];
+            for (let func of layout) {
+                l.push(func());
+            }
+            return l;
+        };
+
+        scene.correct_func = obj.correct_func;
+
+        return scene as Scene;
+    }
+
+    static async parse_level(obj: AnyObject): Promise<Level> {
+        let level: AnyObject = {};
+
+        level.position = new Rect(...(obj.position as [number, number, number, number]));
+        level.paper = await loadImage(obj.paper);
+        level.prompt = obj.prompt;
+        level.correct = (obj.correct as Array<number>).slice();
+
+        level.objects = [];
+        for (let url of obj.objects) {
+            level.objects.push(await loadImage(url));
+        }
+
+        level.scenes = [];
+        for (let scene of obj.scenes) {
+            level.scenes.push(await this.parse_scene(scene));
+        }
+
+        return level as Level;
+    }
+
+    static async parse_session(obj: AnyObject): Promise<Session> {
+        let session: AnyObject = {};
+
+        session.map = await loadImage(obj.map);
+        session.background = await loadImage(obj.background);
+        session.marker = await loadImage(obj.marker);
+
+        session.levels = [];
+        for (let level of obj.levels) {
+            session.levels.push(await this.parse_level(level));
+        }
+
+        return session as Session;
+    }
+
+    static async parse_course(obj: AnyObject): Promise<Course> {
+        let course: AnyObject = {};
+
+        course.map = await loadImage(obj.map);
+        course.finished_marker = await loadImage(obj.finished_marker);
+        course.unfinished_marker = await loadImage(obj.unfinished_marker);
+
+        return course as Course;
+    }
+
     // Indicator of whether there is an alert modal
     private is_alert: boolean = false;
 
@@ -80,7 +201,6 @@ export class Game {
     private button_background: HTMLImageElement | null;
     private object_select_grid: HTMLImageElement | null;
     private object_select_background: HTMLImageElement | null;
-    private modal_background: HTMLImageElement | null;
     private speaker: HTMLImageElement | null;
     private play_bar: HTMLImageElement | null;
 
@@ -107,7 +227,7 @@ export class Game {
     }
 
     private async update_progress(progress: Progress): Promise<void> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             // TODO: Deal with progress
             this.game_progress = progress;
             resolve();
@@ -432,12 +552,13 @@ export class Game {
         this.renderer.draw(
             new Img(this.speaker, new Rect(0, this.height - this.height / 3, this.height / 3, this.height / 3))
         );
-        this.renderer.draw(
-            new Dialog(
-                new Rect(this.height / 4, this.height - this.height / 3 - this.height * 0.23, -1, this.height / 3),
-                scene.question
-            )
+
+        let dialog: Dialog = new Dialog(
+            new Rect(this.height / 4, this.height - this.height / 3 - this.height * 0.23, -1, this.height / 3),
+            scene.question
         );
+        dialog.prevent_freeze = true; // Prevent from being placed other dynamic components
+        this.renderer.draw(dialog);
 
         let timer: Timer;
         if (!is_replaying) {
@@ -449,7 +570,7 @@ export class Game {
         }
 
         let callback: EventListener = () => {
-            if (is_replaying || timer.finished) {
+            if (is_replaying || (typeof timer != 'undefined' && timer.finished)) {
                 this.renderer.draw(new Img(session.background, new Rect(0, 0, this.width, this.height)));
 
                 this.renderer.draw(
@@ -556,12 +677,12 @@ export class Game {
                 };
                 this.renderer.draw(button);
 
-                this.renderer.parent.removeEventListener('click', callback);
+                this.renderer.removeEventListener('click', callback);
 
                 this.renderer.render();
             }
         };
-        this.renderer.parent.addEventListener('click', callback);
+        this.renderer.addEventListener('click', callback);
 
         // Freeze interaction
         this.renderer.render(true);
@@ -615,7 +736,6 @@ export class Game {
         this.button_background = await loadImage(ButtonBackground);
         this.object_select_grid = await loadImage(ObjectSelectGrid);
         this.object_select_background = await loadImage(ObjectSelectBackground);
-        this.modal_background = await loadImage(ModalBackground);
         this.speaker = await loadImage(Speaker);
         this.play_bar = await loadImage(PlayBar);
     }
@@ -658,4 +778,8 @@ export type Progress = {
     session: number;
     level: number;
     scene: number;
+};
+
+type AnyObject = {
+    [prop: string]: any;
 };
