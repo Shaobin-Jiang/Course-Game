@@ -23,6 +23,9 @@ export class Button extends Component {
         private fg_color: string | CanvasGradient | CanvasPattern = '#000000'
     ) {
         super();
+
+        // Means of pre-caution
+        this.rect = this.rect.copy();
     }
 
     // Mouse state in the last frame

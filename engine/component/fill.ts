@@ -11,6 +11,9 @@ export class Fill extends Component {
      */
     constructor(private rect: Rect, private color: string | CanvasGradient | CanvasPattern = '#ffffff') {
         super();
+
+        // Means of pre-caution
+        this.rect = this.rect.copy();
     }
 
     public draw(canvas: HTMLCanvasElement, canvas_rect: Rect, event: GameEvent): void {

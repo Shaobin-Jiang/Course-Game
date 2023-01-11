@@ -13,6 +13,9 @@ export class Timer extends Component {
     constructor(private initial_time: number, private rect: Rect) {
         super();
 
+        // Means of pre-caution
+        this.rect = this.rect.copy();
+
         this.initial_time = Math.max(Math.min(this.initial_time, 3599), 0);
 
         // Adjust component rect; aspect ratio is 3 : 1

@@ -15,6 +15,9 @@ export class Marker extends Img {
      */
     constructor(image: HTMLImageElement, rect: Rect, private flash: boolean = false) {
         super(image, rect);
+
+        // Means of pre-caution
+        this.rect = this.rect.copy();
     }
 
     private flash_curve: (t: number) => number = cubicBezier(1, 0.2, 0.2, 1);

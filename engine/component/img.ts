@@ -11,6 +11,9 @@ export class Img extends Component {
      */
     constructor(private image: HTMLImageElement, protected rect: Rect | null = null) {
         super();
+
+        // Means of pre-caution
+        this.rect = this.rect.copy();
     }
 
     public draw(canvas: HTMLCanvasElement, canvas_rect: Rect, event: GameEvent): void {

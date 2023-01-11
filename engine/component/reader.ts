@@ -12,6 +12,9 @@ export class Reader extends Component {
     constructor(private content: HTMLImageElement, private rect: Rect) {
         super();
 
+        // Means of pre-caution
+        this.rect = this.rect.copy();
+
         // Always fit width of the reader
         this.scale_factor = rect.width / content.width;
 

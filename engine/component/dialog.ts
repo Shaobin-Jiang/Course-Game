@@ -37,6 +37,9 @@ export class Dialog extends Component {
             this.rect.width = this.rect.height * this.aspect_ratio;
         }
 
+        // Means of pre-caution
+        this.rect = this.rect.copy();
+
         this.text_rect = new Rect(
             this.rect.x + this.rect.width * (3.57 / 12.41),
             this.rect.y + this.rect.height * (1.79 / 8.47),
