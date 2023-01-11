@@ -182,6 +182,22 @@ export class Renderer {
         this.should_redraw = true;
     }
 
+    public addEventListener(
+        type: string,
+        listener: EventListenerOrEventListenerObject,
+        options: boolean | AddEventListenerOptions | null = null
+    ): void {
+        this.front_buffer_canvas.addEventListener(type, listener, options);
+    }
+
+    public removeEventListener(
+        type: string,
+        listener: EventListenerOrEventListenerObject,
+        options: boolean | AddEventListenerOptions | null = null
+    ): void {
+        this.front_buffer_canvas.removeEventListener(type, listener, options);
+    }
+
     /**
      * Add a draw call to the renderer's draw call list
      *
