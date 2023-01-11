@@ -710,7 +710,7 @@ export class Game {
 
             let modal_text: HTMLDivElement = document.createElement('div');
             modal_text.className = 'cg-game-alert-text';
-            modal_text.innerHTML = msg;
+            modal_text.innerHTML = `<p>${msg}</p>`;
             modal_window.appendChild(modal_text);
 
             let modal_confirm: HTMLImageElement = document.createElement('img');
