@@ -348,7 +348,8 @@ export class Game {
         if (read_time == null) {
             // Replay
             if (game_progress.session > session_id || game_progress.level > level_id) {
-                time = 20;
+                // time = 20;
+                time = 1;
             } else {
                 // TODO: reset this to 60 when finished with debugging
                 time = 1;
@@ -502,7 +503,9 @@ export class Game {
 
                 this.play_scene(session_id, level_id, scene_id);
             } else {
-                this.alert('选择错误，请重新选择~');
+                this.alert('选择错误，请重新选择~', () => {
+                    this.prompt_object_selection(session_id, level_id);
+                });
             }
         };
         this.renderer.draw(button);
@@ -626,6 +629,8 @@ export class Game {
                         let alert_text: string;
                         if (level_id == 0) {
                             alert_text = '已完成本章全部关卡！';
+                        } else if (scene_id == 0) {
+                            alert_text = '恭喜你，成功完成本关卡！<br>快去下一关看看吧！';
                         } else {
                             alert_text = '太棒了！操作正确！<br>请接着做后面的实验吧！';
                         }
