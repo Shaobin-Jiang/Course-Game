@@ -104,17 +104,13 @@ export class Drag extends Img {
 
         // Highlight target area
         // Define it here so that we can use the `event` variable
-        let highlight: (region: Rect) => boolean = (region: Rect) => {
-            if (event.position.inside(region)) {
-                let ctx: CanvasRenderingContext2D = canvas.getContext('2d');
-                let fillStyle: string | CanvasGradient | CanvasPattern = ctx.fillStyle;
-                ctx.fillStyle = '#cce099'; // light green
-                ctx.fillRect(region.x, region.y, region.width, region.height);
-                ctx.fillStyle = fillStyle;
-                return true;
-            } else {
-                return false;
-            }
+        let highlight: (region: Rect) => void = (region: Rect) => {
+            let ctx: CanvasRenderingContext2D = canvas.getContext('2d');
+            let fillStyle: string | CanvasGradient | CanvasPattern = ctx.fillStyle;
+            ctx.fillStyle = '#cce099'; // light green
+            ctx.fillRect(region.x, region.y, region.width, region.height);
+            ctx.fillStyle = fillStyle;
+            return true;
         };
 
         if (this.is_moving) {
@@ -127,9 +123,7 @@ export class Drag extends Img {
             // If in target area, highlight that area
             if (Array.isArray(this.target_area)) {
                 for (let region of this.target_area) {
-                    if (highlight(region)) {
-                        break;
-                    }
+                    highlight(region);
                 }
             } else if (this.target_area != null) {
                 highlight(this.target_area);
