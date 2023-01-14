@@ -1,5 +1,6 @@
 // Import dependencies
 import {Component} from './component/component';
+import {CenteredText} from './component/centered-text';
 import {SingleSelect} from './component/single-select';
 import {Fill} from './component/fill';
 import {Dialog} from './component/dialog';
@@ -533,6 +534,16 @@ export class Game {
         this.renderer.draw(
             new Fill(new Rect(this.width * 0.125, this.height * 0.15, this.width * 0.75, this.height * 0.7))
         );
+        this.renderer.draw(
+            new CenteredText(
+                `关卡${Math.floor(level_id) + 1}（共${session.levels.length}关）: ${Math.floor(scene_id) + 1} / ${
+                    level.scenes.length
+                }`,
+                new Rect(this.width * 0.625, this.height * 0.015, this.width * 0.25, this.height * 0.125),
+                '#000000',
+                this.height * 0.03
+            )
+        );
 
         let layout: Array<Component> = scene.layout();
 
@@ -575,6 +586,16 @@ export class Game {
                 );
                 this.renderer.draw(
                     new Fill(new Rect(this.width * 0.125, this.height * 0.15, this.width * 0.75, this.height * 0.7))
+                );
+                this.renderer.draw(
+                    new CenteredText(
+                        `关卡${Math.floor(level_id) + 1}（共${session.levels.length}关）: ${
+                            Math.floor(scene_id) + 1
+                        } / ${level.scenes.length}`,
+                        new Rect(this.width * 0.625, this.height * 0.015, this.width * 0.25, this.height * 0.125),
+                        '#000000',
+                        this.height * 0.03
+                    )
                 );
 
                 let prompt_button: Button = new Button(
