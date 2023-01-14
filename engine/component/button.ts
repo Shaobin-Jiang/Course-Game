@@ -34,10 +34,13 @@ export class Button extends Component {
     // Indicate whether the button is being held
     private button_held: boolean = false;
 
+    // Whether to draw curved border
+    protected curved: boolean = true;
+
     // Set border of the button
     // Make a stand-alone function out of this because there are other classes inheriting from the `Button` class which
     // would need to use the precise range (round border included) of the button
-    protected draw_border(context: CanvasRenderingContext2D) {
+    protected draw_curved_border(context: CanvasRenderingContext2D) {
         let border_radius: number = Math.min(this.rect.width, this.rect.height) / 10;
 
         // Draw background of the button
@@ -69,6 +72,16 @@ export class Button extends Component {
         );
         context.lineTo(this.rect.x, this.rect.y + border_radius);
         context.arcTo(this.rect.x, this.rect.y, this.rect.x + border_radius, this.rect.y, border_radius);
+    }
+
+    protected draw_border(context: CanvasRenderingContext2D): void {
+        // Draw background of the button
+        context.beginPath();
+        context.moveTo(this.rect.x, this.rect.y);
+        context.lineTo(this.rect.x + this.rect.width, this.rect.y);
+        context.lineTo(this.rect.x + this.rect.width, this.rect.y + this.rect.height);
+        context.lineTo(this.rect.x, this.rect.y + this.rect.height);
+        context.lineTo(this.rect.x, this.rect.y);
     }
 
     // Draw the content of the button
@@ -122,7 +135,11 @@ export class Button extends Component {
             context.globalAlpha = 1;
         }
 
-        this.draw_border(context);
+        if (this.curved) {
+            this.draw_curved_border(context);
+        } else {
+            this.draw_border(context);
+        }
 
         if (this.bg_image == null) {
             context.fillStyle = this.bg_color;

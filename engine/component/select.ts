@@ -10,8 +10,15 @@ export class Select extends Button {
      * @param bg_image The background image of the component
      * @param fg_image The foreground image, i.e., the object to select, of the component
      */
-    constructor(rect: Rect, bg_image: HTMLImageElement, private fg_image: HTMLImageElement | null = null) {
+    constructor(
+        rect: Rect,
+        bg_image: HTMLImageElement,
+        private fg_image: HTMLImageElement | null = null,
+        curved: boolean = true
+    ) {
         super('', rect, 0, bg_image);
+
+        this.curved = curved;
 
         if (this.fg_image != null) {
             let foreground_size_limit: number = 0.6;
@@ -39,7 +46,11 @@ export class Select extends Button {
         params[0] = new Rect(...(params[0] as [number, number, number, number]));
         params[1] = await loadImage(params[1] as string);
         if (params.length >= 3) {
-            params[2] = await loadImage(params[2] as string);
+            if (params[2] == '') {
+                params[2] = null;
+            } else {
+                params[2] = await loadImage(params[2] as string);
+            }
         }
         return () => new Select(...(params as [Rect, HTMLImageElement]));
     }
@@ -72,7 +83,11 @@ export class Select extends Button {
             context.globalAlpha = 0.4;
             context.fillStyle = '#000000';
 
-            this.draw_border(context);
+            if (this.curved) {
+                this.draw_curved_border(context);
+            } else {
+                this.draw_border(context);
+            }
             context.fill();
         }
 

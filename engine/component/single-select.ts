@@ -32,6 +32,9 @@ export class SingleSelect extends Component {
         let func_list: Array<() => Select> = [];
 
         for (let param of params) {
+            param = param.slice();
+            param.push('')
+            param.push(false);
             func_list.push(await Select.from(param));
         }
 
