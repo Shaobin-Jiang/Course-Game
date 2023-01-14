@@ -1,5 +1,5 @@
 import {Rect} from '../geometry';
-import {GameEvent} from '../util';
+import {GameEvent, loadImage} from '../util';
 import {Img} from './img';
 
 export class Drag extends Img {
@@ -41,6 +41,19 @@ export class Drag extends Img {
     // but for now, just do not try to draw drag components to different renderers, or things can get messy, and you
     // could end up bring devastating damage to the content of several canvases.
     static registered_list: Map<Drag, boolean> = new Map();
+
+    static async from(params: Array<any>): Promise<() => Drag> {
+        params[0] = await loadImage(params[0] as string);
+        params[1] = new Rect(...(params[1] as [number, number, number, number]));
+        if (params.length >= 4) {
+            let arr: Array<Rect> = [];
+            for (let rect of params[3] as Array<[number, number, number, number]>) {
+                arr.push(new Rect(...rect));
+            }
+            params[3] = arr;
+        }
+        return () => new Drag(...(params as [HTMLImageElement, Rect]));
+    }
 
     // Store default rect of the component, so that when the `restore_position_upon_loose` option is set to `true`, the
     // component knows where to return to

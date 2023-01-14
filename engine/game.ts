@@ -1,5 +1,6 @@
 // Import dependencies
 import {Component} from './component/component';
+import {SingleSelect} from './component/single-select';
 import {Fill} from './component/fill';
 import {Dialog} from './component/dialog';
 import {Marker} from './component/marker';
@@ -92,31 +93,19 @@ export class Game {
 
         switch ((obj.name as string).toLowerCase()) {
             case 'dialog':
-                params[0] = new Rect(...(params[0] as [number, number, number, number]));
-                component = () => new Dialog(params[0], params[1] as string);
+                component = await Dialog.from(params);
                 break;
             case 'drag':
-                params[0] = await loadImage(params[0] as string);
-                params[1] = new Rect(...(params[1] as [number, number, number, number]));
-                if (params.length >= 4) {
-                    let arr: Array<Rect> = [];
-                    for (let rect of params[3] as Array<[number, number, number, number]>) {
-                        arr.push(new Rect(...rect));
-                    }
-                    params[3] = arr;
-                }
-                component = () => new Drag(...(params as [HTMLImageElement, Rect]));
+                component = await Drag.from(params);
                 break;
             case 'img':
-                params[0] = await loadImage(params[0] as string);
-                params[1] = new Rect(...(params[1] as [number, number, number, number]));
-                component = () => new Img(params[0] as HTMLImageElement, params[1] as Rect);
+                component = await Img.from(params);
                 break;
             case 'select':
-                params[0] = new Rect(...(params[0] as [number, number, number, number]));
-                params[1] = await loadImage(params[1] as string);
-                params[2] = await loadImage(params[2] as string);
-                component = () => new Select(params[0], params[1], params[2]);
+                component = await Select.from(params);
+                break;
+            case 'single-select':
+                component = await SingleSelect.from(params);
                 break;
         }
 
@@ -566,7 +555,9 @@ export class Game {
         let timer: Timer;
         if (!is_replaying) {
             timer = new Timer(
-                first_attempt ? 10 : 5,
+                // TODO: restore timing to its proper value
+                // first_attempt ? 10 : 5,
+                first_attempt ? 2 : 1,
                 new Rect(this.width * 0.14, this.height * 0.045, -1, this.height * 0.065)
             );
             this.renderer.draw(timer);

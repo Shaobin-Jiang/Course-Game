@@ -50,6 +50,11 @@ export class Dialog extends Component {
 
     static dialog_text_box: HTMLImageElement | null = null;
 
+    static async from(params: Array<any>): Promise<() => Dialog> {
+        params[0] = new Rect(...(params[0] as [number, number, number, number]));
+        return () => new Dialog(params[0], params[1] as string);
+    }
+
     // Rect of the individual parts within the maximized Dialog component
     private text_rect: Rect;
 

@@ -1,5 +1,5 @@
 import {Rect} from '../geometry';
-import {GameEvent} from '../util';
+import {GameEvent, loadImage} from '../util';
 import {Component} from './component';
 
 export class Img extends Component {
@@ -14,6 +14,12 @@ export class Img extends Component {
 
         // Means of pre-caution
         this.rect = this.rect.copy();
+    }
+
+    static async from(params: Array<any>): Promise<() => Img> {
+        params[0] = await loadImage(params[0] as string);
+        params[1] = new Rect(...(params[1] as [number, number, number, number]));
+        return () => new Img(params[0] as HTMLImageElement, params[1] as Rect);
     }
 
     public draw(canvas: HTMLCanvasElement, canvas_rect: Rect, event: GameEvent): void {
