@@ -40,6 +40,7 @@ export class Game {
         this.renderer = new Renderer(this.parent, this.width, this.height, scale);
 
         window.addEventListener('resize', this.resize_callback);
+        document.addEventListener('keyup', this.keyup_callback);
     }
 
     // Registered event listeners
@@ -184,6 +185,11 @@ export class Game {
     // Indicator of whether there is an alert modal
     private is_alert: boolean = false;
 
+    // Indicator of whether the user is on the pick-session page
+    private is_picking_session: boolean = false;
+
+    private is_showing_menu: boolean = false;
+
     // TODO: change this property back to private when finished with debugging
     public game_progress: Progress | null = null;
 
@@ -199,6 +205,12 @@ export class Game {
             this.renderer.setHeight(document.documentElement.clientHeight);
         } else {
             this.renderer.setHeight((document.documentElement.clientWidth / this.width) * this.height);
+        }
+    };
+
+    private keyup_callback: EventListener = (event: KeyboardEvent) => {
+        if (event.key == 'Escape') {
+            this.menu();
         }
     };
 
@@ -231,6 +243,8 @@ export class Game {
     public game_content: Array<Session> = new Array(this.course.sessions.length);
 
     public pick_session(): void {
+        this.is_picking_session = true;
+
         this.renderer.draw(new Img(this.course.map, new Rect(0, 0, this.width, this.height)));
 
         for (let i = 0; i <= this.game_progress.session; i++) {
@@ -273,6 +287,8 @@ export class Game {
     }
 
     public pick_level(session_id: number): void {
+        this.is_picking_session = false;
+
         let game_progress: Progress = this.game_progress;
 
         if (session_id > game_progress.session) {
@@ -314,6 +330,8 @@ export class Game {
 
     // Game page: read paper
     public read_paper(session_id: number, level_id: number, read_time: number | null = null): void {
+        this.is_picking_session = false;
+
         let game_progress: Progress = this.game_progress;
 
         if (!this.validate_progress(session_id, level_id)) {
@@ -391,6 +409,8 @@ export class Game {
     }
 
     public prompt_object_selection(session_id: number, level_id: number): void {
+        this.is_picking_session = false;
+
         let game_progress: Progress = this.game_progress;
 
         if (!this.validate_progress(session_id, level_id)) {
@@ -417,6 +437,8 @@ export class Game {
     }
 
     public select_object(session_id: number, level_id: number): void {
+        this.is_picking_session = false;
+
         let game_progress: Progress = this.game_progress;
 
         if (!this.validate_progress(session_id, level_id)) {
@@ -504,6 +526,8 @@ export class Game {
     }
 
     public play_scene(session_id: number, level_id: number, scene_id: number): void {
+        this.is_picking_session = false;
+
         let game_progress: Progress = this.game_progress;
 
         if (!this.validate_progress(session_id, level_id)) {
@@ -705,7 +729,7 @@ export class Game {
         this.renderer.render(true);
     }
 
-    public alert(msg: string, callback: Function | null = null, blur: boolean = true): void {
+    private alert(msg: string, callback: Function | null = null, blur: boolean = true): void {
         if (!this.is_alert) {
             this.is_alert = true;
 
@@ -749,6 +773,98 @@ export class Game {
         }
     }
 
+    private menu(): void {
+        if (!this.is_alert && !this.is_showing_menu) {
+            this.is_showing_menu = true;
+
+            let modal: HTMLDivElement = document.createElement('div');
+            modal.className = 'menu-modal';
+            this.renderer.parent.appendChild(modal);
+
+            if (!this.is_picking_session) {
+                let return_to_picking_session: HTMLDivElement = document.createElement('div');
+                return_to_picking_session.className = 'menu-option';
+                return_to_picking_session.innerText = '返回主界面';
+                modal.appendChild(return_to_picking_session);
+
+                let pick_session_callback = () => {
+                    return_to_picking_session.removeEventListener('click', pick_session_callback);
+                    modal.remove();
+                    this.is_showing_menu = false;
+                    this.pick_session();
+                };
+
+                return_to_picking_session.addEventListener('click', pick_session_callback);
+            }
+
+            let close: HTMLDivElement = document.createElement('div');
+            close.className = 'menu-option';
+            close.innerText = '关闭菜单';
+            modal.appendChild(close);
+
+            let close_callback = () => {
+                close.removeEventListener('click', close_callback);
+                modal.remove();
+                this.is_showing_menu = false;
+            };
+            close.addEventListener('click', close_callback);
+
+            let about: HTMLDivElement = document.createElement('div');
+            about.className = 'menu-option';
+            about.innerText = '关于游戏';
+            modal.appendChild(about);
+
+            let about_callback = () => {
+                about.removeEventListener('click', about_callback);
+                modal.remove();
+                this.is_showing_menu = false;
+                this.about();
+            };
+            about.addEventListener('click', about_callback);
+
+            let logout: HTMLDivElement = document.createElement('div');
+            logout.className = 'menu-option';
+            logout.innerText = '退出登录';
+            modal.appendChild(logout);
+
+            let logout_callback = () => {
+                logout.removeEventListener('click', logout_callback);
+                modal.remove();
+                this.is_showing_menu = false;
+                this.logout();
+            };
+            logout.addEventListener('click', logout_callback);
+        } else if (this.is_showing_menu) {
+            this.renderer.parent.querySelector('.menu-modal').remove();
+            this.is_showing_menu = false;
+        }
+    }
+
+    private about(): void {
+        let modal: HTMLDivElement = document.createElement('div');
+        modal.className = 'about-modal';
+        this.renderer.parent.appendChild(modal);
+
+        let page: HTMLDivElement = document.createElement('div');
+        page.id = 'about-content';
+        modal.appendChild(page);
+
+        page.innerHTML = this.about_text;
+
+        let close_btn: HTMLDivElement = document.createElement('div');
+        close_btn.id = 'about-close';
+        close_btn.innerText = '关闭';
+        page.appendChild(close_btn);
+
+        close_btn.addEventListener('click', () => {
+            modal.remove();
+        })
+    }
+
+    private logout(): void {}
+
+    public about_text: string = '';
+
     public async load() {
         this.button_background = await loadImage(ButtonBackground);
         this.object_select_grid = await loadImage(ObjectSelectGrid);
@@ -759,6 +875,7 @@ export class Game {
 
     public destroy() {
         window.removeEventListener('resize', this.resize_callback);
+        document.removeEventListener('keyup', this.keyup_callback);
     }
 }
 
