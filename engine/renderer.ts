@@ -16,7 +16,7 @@ export class Renderer {
         parent.appendChild(this.parent);
 
         this.back_buffer_canvas = this.create_canvas();
-        this.back_buffer = this.back_buffer_canvas.getContext('2d');
+        this.back_buffer = this.back_buffer_canvas.getContext('2d', {willReadFrequently: true});
 
         this.front_buffer_canvas = this.create_canvas();
         this.front_buffer = this.front_buffer_canvas.getContext('2d');
