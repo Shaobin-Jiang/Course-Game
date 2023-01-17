@@ -19,7 +19,8 @@ export class Drag extends Img {
         rect: Rect,
         private restore_position_upon_loose: boolean = false,
         private target_area: Array<Rect> | Rect | null = null,
-        private absorb: boolean = false
+        private absorb: boolean = false,
+        private show_target_area = true
     ) {
         super(image, rect);
 
@@ -118,11 +119,13 @@ export class Drag extends Img {
         // Highlight target area
         // Define it here so that we can use the `event` variable
         let highlight: (region: Rect) => void = (region: Rect) => {
-            let ctx: CanvasRenderingContext2D = canvas.getContext('2d');
-            let fillStyle: string | CanvasGradient | CanvasPattern = ctx.fillStyle;
-            ctx.fillStyle = '#cce099'; // light green
-            ctx.fillRect(region.x, region.y, region.width, region.height);
-            ctx.fillStyle = fillStyle;
+            if (this.show_target_area) {
+                let ctx: CanvasRenderingContext2D = canvas.getContext('2d');
+                let fillStyle: string | CanvasGradient | CanvasPattern = ctx.fillStyle;
+                ctx.fillStyle = '#cce099'; // light green
+                ctx.fillRect(region.x, region.y, region.width, region.height);
+                ctx.fillStyle = fillStyle;
+            }
             return true;
         };
 
