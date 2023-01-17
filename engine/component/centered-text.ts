@@ -12,6 +12,11 @@ export class CenteredText extends Component {
         super();
     }
 
+    static async from(params: Array<any>): Promise<() => CenteredText> {
+        params[1] = new Rect(...(params[1] as [number, number, number, number]));
+        return () => new CenteredText(...(params as [string, Rect, string, number]));
+    }
+
     public draw(canvas: HTMLCanvasElement, rect: Rect, event: GameEvent): void {
         let context: CanvasRenderingContext2D = canvas.getContext('2d');
 

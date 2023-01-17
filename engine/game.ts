@@ -109,6 +109,9 @@ export class Game {
             case 'single-select':
                 component = await SingleSelect.from(params);
                 break;
+            case 'text':
+                component = await CenteredText.from(params);
+                break;
         }
 
         return component;
