@@ -666,7 +666,7 @@ export class Game {
                         }
 
                         let alert_text: string;
-                        if (level_id == 0) {
+                        if (level_id == 0 && scene_id == 0) {
                             alert_text = '已完成本章全部关卡！';
                         } else if (scene_id == 0) {
                             alert_text = '恭喜你，成功完成本关卡！<br>快去下一关看看吧！';
@@ -689,7 +689,7 @@ export class Game {
                             }
 
                             promise.then(() => {
-                                if (level_id == 0) {
+                                if (level_id == 0 && scene_id == 0) {
                                     this.pick_session();
                                 } else if (scene_id == 0) {
                                     this.pick_level(session_id);
