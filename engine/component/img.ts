@@ -9,17 +9,19 @@ export class Img extends Component {
      * @param image The image to be rendered
      * @param rect The rect of the rendered image, the lack of which would render the image at its original size
      */
-    constructor(private image: HTMLImageElement, protected rect: Rect | null = null) {
+    constructor(private image: HTMLImageElement, protected rect: Rect | null = null, unfreeze: boolean = false) {
         super();
 
         // Means of pre-caution
         this.rect = this.rect.copy();
+
+        this.prevent_freeze = unfreeze;
     }
 
     static async from(params: Array<any>): Promise<() => Img> {
         params[0] = await loadImage(params[0] as string);
         params[1] = new Rect(...(params[1] as [number, number, number, number]));
-        return () => new Img(params[0] as HTMLImageElement, params[1] as Rect);
+        return () => new Img(...(params as [HTMLImageElement, Rect]));
     }
 
     public draw(canvas: HTMLCanvasElement, canvas_rect: Rect, event: GameEvent): void {
