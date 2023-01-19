@@ -713,6 +713,7 @@ export class Game {
 
                             this.update_progress(progress).then(() => {
                                 this.alert('太遗憾了，你的操作是错误的！<br>回到文献中再看看吧！', () => {
+                                    // TODO: set this time to 20s in production
                                     this.read_paper(session_id, level_id);
                                 });
                             });
