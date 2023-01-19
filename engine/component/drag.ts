@@ -180,6 +180,23 @@ export class Drag extends Img {
                 }
             } else if (this.restore_position_upon_loose) {
                 this.restore_default_position();
+            } else {
+                // Do not absorb, but remain in the target area all the same
+                if (Array.isArray(this.target_area)) {
+                    let index: number = 0;
+                    for (let region of this.target_area) {
+                        if (event.position.inside(region)) {
+                            this.whereabout = index;
+                            break;
+                        } else {
+                            index++;
+                        }
+                    }
+                } else if (this.target_area != null) {
+                    if (event.position.inside(this.target_area)) {
+                        this.whereabout = 0;
+                    }
+                }
             }
         }
 
