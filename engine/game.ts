@@ -193,6 +193,8 @@ export class Game {
 
     private is_showing_menu: boolean = false;
 
+    private alert_modal: HTMLDivElement | null = null;
+
     // TODO: change this property back to private when finished with debugging
     public game_progress: Progress | null = null;
 
@@ -737,43 +739,26 @@ export class Game {
         if (!this.is_alert) {
             this.is_alert = true;
 
-            let modal: HTMLDivElement = document.createElement('div');
-            modal.className = 'cg-game-alert';
+            this.alert_modal.querySelector('.cg-game-alert-text').innerHTML = `<p>${msg}</p>`;
+            this.alert_modal.style.display = 'flex';
+
             if (blur) {
-                modal.classList.add('cg-game-alert-blur');
+                this.alert_modal.classList.add('cg-game-alert-blur');
             }
-            this.renderer.parent.appendChild(modal);
-
-            let modal_window: HTMLDivElement = document.createElement('div');
-            modal_window.className = 'cg-game-alert-window';
-            modal.appendChild(modal_window);
-
-            let modal_background: HTMLImageElement = document.createElement('img');
-            modal_background.className = 'cg-game-alert-background';
-            modal_background.src = ModalBackground;
-            modal_window.appendChild(modal_background);
-
-            let modal_text: HTMLDivElement = document.createElement('div');
-            modal_text.className = 'cg-game-alert-text';
-            modal_text.innerHTML = `<p>${msg}</p>`;
-            modal_window.appendChild(modal_text);
-
-            let modal_confirm: HTMLImageElement = document.createElement('img');
-            modal_confirm.className = 'cg-game-alert-confirm';
-            modal_confirm.src = ButtonBackground;
-            modal_window.appendChild(modal_confirm);
 
             let modal_callback: EventListener = () => {
-                modal_confirm.removeEventListener('click', modal_callback);
-                modal.remove();
+                this.alert_modal.querySelector('.cg-game-alert-confirm').removeEventListener('click', modal_callback);
+                this.alert_modal.style.display = 'none';
                 this.is_alert = false;
+
+                this.alert_modal.classList.remove('cg-game-alert-blur');
 
                 if (callback != null) {
                     callback();
                 }
             };
 
-            modal_confirm.addEventListener('click', modal_callback);
+            this.alert_modal.querySelector('.cg-game-alert-confirm').addEventListener('click', modal_callback);
         }
     }
 
@@ -862,19 +847,50 @@ export class Game {
 
         close_btn.addEventListener('click', () => {
             modal.remove();
-        })
+        });
     }
 
     private logout(): void {}
 
     public about_text: string = '';
 
-    public async load() {
+    private async load(): Promise<void> {
         this.button_background = await loadImage(ButtonBackground);
         this.object_select_grid = await loadImage(ObjectSelectGrid);
         this.object_select_background = await loadImage(ObjectSelectBackground);
         this.speaker = await loadImage(Speaker);
         this.play_bar = await loadImage(PlayBar);
+    }
+
+    public async start(): Promise<void> {
+        await this.load();
+
+        let modal: HTMLDivElement = document.createElement('div');
+        modal.className = 'cg-game-alert';
+        modal.style.display = 'none';
+        this.renderer.parent.appendChild(modal);
+
+        let modal_window: HTMLDivElement = document.createElement('div');
+        modal_window.className = 'cg-game-alert-window';
+        modal.appendChild(modal_window);
+
+        let modal_background: HTMLImageElement = document.createElement('img');
+        modal_background.className = 'cg-game-alert-background';
+        modal_background.src = ModalBackground;
+        modal_window.appendChild(modal_background);
+
+        let modal_text: HTMLDivElement = document.createElement('div');
+        modal_text.className = 'cg-game-alert-text';
+        modal_window.appendChild(modal_text);
+
+        let modal_confirm: HTMLImageElement = document.createElement('img');
+        modal_confirm.className = 'cg-game-alert-confirm';
+        modal_confirm.src = ButtonBackground;
+        modal_window.appendChild(modal_confirm);
+
+        this.alert_modal = modal;
+
+        this.pick_session();
     }
 
     public destroy() {

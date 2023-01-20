@@ -73,6 +73,10 @@ body {
     position: relative;
 }
 
+.cg-game-alert-confirm:hover {
+    opacity: 0.8;
+}
+
 /* Menu */
 .menu-modal {
     align-items: center;
