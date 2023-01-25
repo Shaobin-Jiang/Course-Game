@@ -195,8 +195,9 @@ export class Game {
 
     private alert_modal: HTMLDivElement | null = null;
 
-    // TODO: change this property back to private when finished with debugging
-    public game_progress: Progress | null = null;
+    private game_progress: Progress = window.progress;
+
+    private csrf_token = (document.getElementsByName('csrfmiddlewaretoken')[0] as HTMLInputElement).value;
 
     // Assets
     private button_background: HTMLImageElement | null;
@@ -226,18 +227,19 @@ export class Game {
         );
     }
 
-    private async get_session_content(url: string): Promise<Session> {
-        // TODO: implement this properly
+    private async update_progress(progress: Progress): Promise<number> {
         return new Promise((resolve) => {
-            resolve(new Object() as Session);
-        });
-    }
-
-    private async update_progress(progress: Progress): Promise<void> {
-        return new Promise((resolve) => {
-            // TODO: Deal with progress
             this.game_progress = progress;
-            resolve();
+            fetch(window.location.href, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.csrf_token},
+                body: JSON.stringify(this.game_progress),
+                credentials: 'same-origin',
+            })
+                .then((response: Response) => response.text())
+                .then((data) => {
+                    resolve(Number(data));
+                });
         });
     }
 
@@ -266,21 +268,10 @@ export class Game {
 
             marker.onclick = () => {
                 if (typeof this.game_content[i] == 'undefined') {
-                    let get_session_promise: Promise<Session>;
-                    let session: string | Session = this.course.sessions[i].get;
+                    let session: Session = this.course.sessions[i].get;
 
-                    if (typeof session == 'string') {
-                        get_session_promise = this.get_session_content(session);
-                    } else {
-                        get_session_promise = new Promise((resolve) => {
-                            resolve(session as Session);
-                        });
-                    }
-
-                    get_session_promise.then((s: Session) => {
-                        this.game_content[i] = s;
-                        this.pick_level(i);
-                    });
+                    this.game_content[i] = session;
+                    this.pick_level(i);
                 } else {
                     this.pick_level(i);
                 }
@@ -679,19 +670,19 @@ export class Game {
                         this.alert(alert_text, () => {
                             let progress: Progress;
 
-                            let promise: Promise<void>;
+                            let promise: Promise<number>;
                             if (!is_replaying) {
                                 progress = {session: session_id, level: level_id, scene: scene_id};
                                 promise = this.update_progress(progress);
                             } else {
                                 progress = game_progress;
                                 promise = new Promise((resolve) => {
-                                    resolve();
+                                    resolve(1);
                                 });
                             }
 
-                            promise.then(() => {
-                                if (level_id == 0 && scene_id == 0) {
+                            promise.then((value: number) => {
+                                if (value != 0 && level_id == 0 && scene_id == 0) {
                                     this.pick_session();
                                 } else if (scene_id == 0) {
                                     this.pick_level(session_id);
@@ -850,7 +841,9 @@ export class Game {
         });
     }
 
-    private logout(): void {}
+    private logout(): void {
+        window.open('/logout', '_self');
+    }
 
     public about_text: string = '';
 
@@ -925,7 +918,7 @@ export type Course = {
     map: HTMLImageElement;
     finished_marker: HTMLImageElement;
     unfinished_marker: HTMLImageElement;
-    sessions: Array<{position: Rect; get: string | Session}>;
+    sessions: Array<{position: Rect; get: Session}>;
 };
 
 export type Progress = {
