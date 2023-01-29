@@ -12,6 +12,7 @@ async function main(): Promise<void> {
     for (let item of window.sessions) {
         sessions.push({position: new Rect(...item.position), get: await Game.parse_session(item.get)});
     }
+    window.sessions = [];
 
     let course: Course = {
         map,

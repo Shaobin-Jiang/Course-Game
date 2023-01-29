@@ -254,16 +254,14 @@ export class Game {
 
         this.renderer.draw(new Img(this.course.map, new Rect(0, 0, this.width, this.height)));
 
-        for (let i = 0; i <= this.game_progress.session; i++) {
+        for (let i = 0; i < this.course.sessions.length; i++) {
             let marker: Marker;
             if (i < this.game_progress.session) {
                 marker = new Marker(this.course.finished_marker, this.course.sessions[i].position);
+            } else if (i == this.game_progress.session) {
+                marker = new Marker(this.course.unfinished_marker, this.course.sessions[i].position);
             } else {
-                if (this.game_progress.session < this.course.sessions.length) {
-                    marker = new Marker(this.course.unfinished_marker, this.course.sessions[i].position);
-                } else {
-                    continue;
-                }
+                continue;
             }
 
             marker.onclick = () => {
