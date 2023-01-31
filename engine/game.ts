@@ -199,6 +199,8 @@ export class Game {
 
     private csrf_token = (document.getElementsByName('csrfmiddlewaretoken')[0] as HTMLInputElement).value;
 
+    private global_callbacks: Map<string, EventListener> = new Map();
+
     // Assets
     private button_background: HTMLImageElement | null;
     private object_select_grid: HTMLImageElement | null;
@@ -251,6 +253,7 @@ export class Game {
 
     public pick_session(): void {
         this.is_picking_session = true;
+        this.renderer.removeEventListener('click', this.global_callbacks.get('finish-dialog'));
 
         this.renderer.draw(new Img(this.course.map, new Rect(0, 0, this.width, this.height)));
 
@@ -592,6 +595,7 @@ export class Game {
             this.renderer.draw(timer);
         }
 
+        //  FIX: the callback is not cancelled if we attempt to return to the session-picking page
         let callback: EventListener = () => {
             if (is_replaying || (typeof timer != 'undefined' && timer.finished)) {
                 this.renderer.draw(new Img(session.background, new Rect(0, 0, this.width, this.height)));
@@ -713,12 +717,18 @@ export class Game {
                 };
                 this.renderer.draw(button);
 
-                this.renderer.removeEventListener('click', callback);
+                this.renderer.removeEventListener('click', this.global_callbacks.get('finish-dialog'));
 
                 this.renderer.render();
             }
         };
-        this.renderer.addEventListener('click', callback);
+        
+        // Make sure to set this every time, despite the fact that this field might have already been set
+        // This is due to the deep-copy issue involved in the function, and if we do not reset this every time, the game
+        // would some how return to the previous point, causing weird bugs
+        this.global_callbacks.set('finish-dialog', callback);
+
+        this.renderer.addEventListener('click', this.global_callbacks.get('finish-dialog'));
 
         // Freeze interaction
         this.renderer.render(true);
@@ -819,6 +829,8 @@ export class Game {
     }
 
     private about(): void {
+        this.is_alert = true;
+
         let modal: HTMLDivElement = document.createElement('div');
         modal.className = 'about-modal';
         this.renderer.parent.appendChild(modal);
@@ -836,6 +848,7 @@ export class Game {
 
         close_btn.addEventListener('click', () => {
             modal.remove();
+            this.is_alert = false;
         });
     }
 
