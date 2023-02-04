@@ -1,4 +1,5 @@
 import {Offset} from './geometry';
+import './progress.css';
 
 let image_map: Map<string, HTMLImageElement> = new Map();
 
@@ -52,4 +53,17 @@ export function loadImage(url: string): Promise<HTMLImageElement> {
 
 export class GameEvent {
     constructor(public button: number = -1, public position: Offset = new Offset(NaN, NaN), public key: string = '') {}
+}
+
+export class Loading {
+    constructor(private parent: HTMLElement = document.body) {
+        let wrapper: HTMLDivElement = document.createElement('div');
+        wrapper.className = 'progress-wrapper';
+        parent.appendChild(wrapper);
+
+        let text: HTMLParagraphElement = document.createElement('p');
+        text.innerHTML = '加载中……';
+        text.className = 'progress-text';
+        wrapper.appendChild(text);
+    }
 }

@@ -1,0 +1,34 @@
+body {
+    height: 100vh;
+    width: 100vw;
+}
+
+.progress-wrapper {
+    background-color: black;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+.progress-text {
+    animation: blink 2s infinite ease-in-out;
+    box-sizing: border-box;
+    color: white;
+    font-size: 2vh;
+    padding-right: 10%;
+    position: absolute;
+    text-align: right;
+    top: 90%;
+    width: 100%;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}

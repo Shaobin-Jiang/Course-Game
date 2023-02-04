@@ -267,9 +267,9 @@ export class Game {
                 continue;
             }
 
-            marker.onclick = () => {
+            marker.onclick = async () => {
                 if (typeof this.game_content[i] == 'undefined') {
-                    let session: Session = this.course.sessions[i].get;
+                    let session: Session = await Game.parse_session(this.course.sessions[i].get);
 
                     this.game_content[i] = session;
                     this.pick_level(i);
@@ -929,7 +929,7 @@ export type Course = {
     map: HTMLImageElement;
     finished_marker: HTMLImageElement;
     unfinished_marker: HTMLImageElement;
-    sessions: Array<{position: Rect; get: Session}>;
+    sessions: Array<{position: Rect; get: AnyObject}>;
 };
 
 export type Progress = {
