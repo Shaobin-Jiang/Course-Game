@@ -1,5 +1,7 @@
 import {Offset} from './geometry';
 
+let image_map: Map<string, HTMLImageElement> = new Map();
+
 export function deepCopy(obj: Object): Object {
     let return_obj: Object = {};
 
@@ -26,13 +28,25 @@ export function cubicBezier(p0: number, p1: number, p2: number, p3: number): (t:
 
 export function loadImage(url: string): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
-        let image: HTMLImageElement = new Image();
-        image.src = url;
-        image.onload = function () {
-            resolve(image);
-        };
+        if (image_map.has(url)) {
+            resolve(image_map.get(url));
+        } else {
+            let image: HTMLImageElement = new Image();
 
-        image.onerror = reject;
+            if (typeof window.static_url != 'undefined' && url[0] == '/') {
+                image.src = `${window.static_url}${url}`;
+            } else {
+                image.src = url;
+            }
+
+            image.crossOrigin = 'Anonymous'; // Prevent canvas getImageData CORS issue
+            image.onload = function () {
+                image_map.set(url, image);
+                resolve(image);
+            };
+
+            image.onerror = reject;
+        }
     });
 }
 
