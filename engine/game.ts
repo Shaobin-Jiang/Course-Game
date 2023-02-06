@@ -576,7 +576,7 @@ export class Game {
         );
 
         let dialog: Dialog = new Dialog(
-            new Rect(this.height / 4, this.height - this.height / 3 - this.height * 0.23, -1, this.height / 3),
+            new Rect(this.height / 4, this.height - this.height / 2 - this.height * 0.23, -1, this.height / 2),
             scene.question
         );
         dialog.prevent_freeze = true; // Prevent from being placed other dynamic components
