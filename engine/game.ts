@@ -353,11 +353,9 @@ export class Game {
         if (read_time == null) {
             // Replay
             if (game_progress.session > session_id || game_progress.level > level_id) {
-                // time = 20;
-                time = 1;
+                time = 20;
             } else {
-                // TODO: reset this to 60 when finished with debugging
-                time = 1;
+                time = 60;
             }
         } else {
             time = read_time;
@@ -587,15 +585,12 @@ export class Game {
         let timer: Timer;
         if (!is_replaying) {
             timer = new Timer(
-                // TODO: restore timing to its proper value
-                // first_attempt ? 10 : 5,
-                first_attempt ? 2 : 1,
+                first_attempt ? 10: 5,
                 new Rect(this.width * 0.14, this.height * 0.045, -1, this.height * 0.065)
             );
             this.renderer.draw(timer);
         }
 
-        //  FIX: the callback is not cancelled if we attempt to return to the session-picking page
         let callback: EventListener = () => {
             if (is_replaying || (typeof timer != 'undefined' && timer.finished)) {
                 this.renderer.draw(new Img(session.background, new Rect(0, 0, this.width, this.height)));
@@ -708,8 +703,7 @@ export class Game {
 
                             this.update_progress(progress).then(() => {
                                 this.alert('太遗憾了，你的操作是错误的！<br>回到文献中再看看吧！', () => {
-                                    // TODO: set this time to 20s in production
-                                    this.read_paper(session_id, level_id);
+                                    this.read_paper(session_id, level_id, 20);
                                 });
                             });
                         }
