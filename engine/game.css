@@ -65,6 +65,10 @@ body {
     width: 80%;
 }
 
+.cg-game-alert-text b {
+    color: lightsalmon;
+}
+
 .cg-game-alert-confirm {
     cursor: pointer;
     display: block;
