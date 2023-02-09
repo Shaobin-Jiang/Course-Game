@@ -66,6 +66,13 @@ export class Drag extends Img {
     // Indicator of the button state in the last frame; useful for detecting change of button status
     private last_draw_button_status: number = -1;
 
+    // FIX: improper rendering of target area
+    // TODO: implement `overlap` function to check if previously rendered components are beneath the target area
+    // TODO: implement `static_render` function to only draw a component, without checking for user interaction
+    private static_draw(canvas: HTMLCanvasElement, canvas_rect: Rect, event: GameEvent): void {
+        super.draw(canvas, canvas_rect, event);
+    }
+
     // Unfreeeze the component
     public prevent_freeze: boolean = true;
 
@@ -125,6 +132,14 @@ export class Drag extends Img {
                 ctx.fillStyle = '#cce099'; // light green
                 ctx.fillRect(region.x, region.y, region.width, region.height);
                 ctx.fillStyle = fillStyle;
+
+                // Repaint any component that might be covered by the highlight area
+                let key_list: Array<Drag> = Array.from(Drag.registered_list.keys());
+                for (let i = 0; i < key_list.indexOf(this); i++) {
+                    if (key_list[i].rect.overlap(region)) {
+                        key_list[i].static_draw(canvas, canvas_rect, event);
+                    }
+                }
             }
             return true;
         };

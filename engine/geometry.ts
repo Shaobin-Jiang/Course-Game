@@ -74,4 +74,13 @@ export class Rect {
     public spread(): [number, number, number, number] {
         return [this.x, this.y, this.width, this.height];
     }
+
+    public overlap(rect: Rect): boolean {
+        return (
+            this.x + this.width > rect.x &&
+            rect.x + rect.width > this.x &&
+            this.y + this.height > rect.y &&
+            rect.y + rect.height > this.y
+        );
+    }
 }
