@@ -8,7 +8,15 @@ async function main(): Promise<void> {
 
     if (typeof window.image_list != 'undefined') {
         for (let url of window.image_list) {
-            await loadImage(url);
+            if (typeof url === 'string') {
+                loadImage(url);
+            } else {
+                if (url[1]) {
+                    await loadImage(url[0]);
+                } else {
+                    loadImage(url[0]);
+                }
+            }
         }
     }
 
@@ -46,6 +54,6 @@ declare global {
         unfinished_marker: string;
         sessions: Array<{position: [number, number, number, number, number]; get: object}>;
         static_url: string;
-        image_list: Array<string>;
+        image_list: Array<string | [string, boolean]>;
     }
 }

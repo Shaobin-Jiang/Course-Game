@@ -39,10 +39,10 @@ export function loadImage(url: string): Promise<HTMLImageElement> {
             } else {
                 image.src = url;
             }
+            image_map.set(url, image);
 
             image.crossOrigin = 'Anonymous'; // Prevent canvas getImageData CORS issue
             image.onload = function () {
-                image_map.set(url, image);
                 resolve(image);
             };
 
