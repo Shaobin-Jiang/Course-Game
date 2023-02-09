@@ -7,17 +7,7 @@ async function main(): Promise<void> {
     new Loading();
 
     if (typeof window.image_list != 'undefined') {
-        for (let url of window.image_list) {
-            if (typeof url === 'string') {
-                loadImage(url);
-            } else {
-                if (url[1]) {
-                    await loadImage(url[0]);
-                } else {
-                    loadImage(url[0]);
-                }
-            }
-        }
+        await Promise.all(window.image_list.map(loadImage));
     }
 
     let map: HTMLImageElement = await loadImage(window.game_map);
