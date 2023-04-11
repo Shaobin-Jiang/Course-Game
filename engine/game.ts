@@ -82,6 +82,8 @@ export class Game {
      * - drag
      * - img
      * - select
+     * - single-select
+     * - text
      *
      * E.g. pass in an object like this:
      * { name: 'drag', params: [] }
@@ -229,13 +231,18 @@ export class Game {
         );
     }
 
-    private async update_progress(progress: Progress): Promise<number> {
+    private async update_progress(progress: Progress, layout: Array<Component>): Promise<number> {
+        let summary: Array<AnyObject> = [];
+        for (let component of layout) {
+            summary.push(component.summary());
+        }
+
         return new Promise((resolve) => {
             this.game_progress = progress;
             fetch(window.location.href, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.csrf_token},
-                body: JSON.stringify(this.game_progress),
+                body: JSON.stringify(Object.assign({summary: summary}, this.game_progress)),
                 credentials: 'same-origin',
             })
                 .then((response: Response) => response.text())
@@ -670,7 +677,7 @@ export class Game {
                             let promise: Promise<number>;
                             if (!is_replaying) {
                                 progress = {session: session_id, level: level_id, scene: scene_id};
-                                promise = this.update_progress(progress);
+                                promise = this.update_progress(progress, layout);
                             } else {
                                 progress = game_progress;
                                 promise = new Promise((resolve) => {
@@ -701,7 +708,7 @@ export class Game {
                                 scene: Math.floor(scene_id) + 0.5,
                             };
 
-                            this.update_progress(progress).then(() => {
+                            this.update_progress(progress, layout).then(() => {
                                 this.alert('太遗憾了，你的操作是错误的！<br>回到文献中再看看吧！', () => {
                                     this.read_paper(session_id, level_id, 20);
                                 });
