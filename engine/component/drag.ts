@@ -226,4 +226,10 @@ export class Drag extends Img {
         // Clear registered list
         Drag.registered_list.delete(this);
     }
+
+    public summary: () => {[prop: string]: any} = () => {
+        return {
+            whereabout: this.whereabout,
+        };
+    };
 }

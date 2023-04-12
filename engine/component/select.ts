@@ -97,4 +97,10 @@ export class Select extends Button {
     public draw(canvas: HTMLCanvasElement, rect: Rect, event: GameEvent): void {
         super.draw(canvas, rect, event);
     }
+
+    public summary: () => {[prop: string]: any} = () => {
+        return {
+            whereabout: this.selected,
+        };
+    };
 }

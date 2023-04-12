@@ -56,4 +56,10 @@ export class SingleSelect extends Component {
             select.draw(canvas, rect, event);
         }
     }
+
+    public summary: () => {[prop: string]: any} = () => {
+        return {
+            whereabout: this.selected,
+        };
+    };
 }
