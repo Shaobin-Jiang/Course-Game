@@ -795,6 +795,18 @@ export class Game {
             };
             close.addEventListener('click', close_callback, {once: true});
 
+            let index: HTMLDivElement = document.createElement('div');
+            index.className = 'menu-option';
+            index.innerText = '返回首页';
+            modal.appendChild(index);
+
+            let index_callback = () => {
+                modal.remove();
+                this.is_showing_menu = false;
+                window.location.href = '/';
+            };
+            index.addEventListener('click', index_callback, {once: true});
+
             let about: HTMLDivElement = document.createElement('div');
             about.className = 'menu-option';
             about.innerText = '关于游戏';
