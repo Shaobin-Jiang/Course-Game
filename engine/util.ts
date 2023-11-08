@@ -67,3 +67,24 @@ export class Loading {
         wrapper.appendChild(text);
     }
 }
+
+export class BrowserValidator {
+    constructor (private banned_browsers: Array<{match: (user_agent: string) => boolean, error: string}>) {}
+
+    public error_message: string = '';
+
+    public browser_is_banned(): boolean {
+        let user_agent: string = navigator.userAgent.toLowerCase();
+        let is_banned: boolean = false;
+
+        for (let browser of this.banned_browsers) {
+            if (browser.match(user_agent)) {
+                is_banned = true;
+                this.error_message = browser.error;
+                break;
+            }
+        }
+
+        return is_banned;
+    }
+}

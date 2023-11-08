@@ -1,9 +1,22 @@
 import {Course} from './engine/game';
 import {Game} from './engine/game';
 import {Rect} from './engine/geometry';
-import {loadImage, Loading} from './engine/util';
+import {loadImage, Loading, BrowserValidator} from './engine/util';
 
 async function main(): Promise<void> {
+    let browser_validator = new BrowserValidator([
+        {
+            match: function (user_agent: string) {
+                return /safari/.test(user_agent) && !/chrome/.test(user_agent);
+            },
+            error: '小游戏目前不支持 Safari 浏览器，可以使用 chrome 浏览器',
+        },
+    ]);
+    if (browser_validator.browser_is_banned()) {
+        alert(browser_validator.error_message);
+        return;
+    }
+
     new Loading();
 
     if (typeof window.image_list != 'undefined') {
