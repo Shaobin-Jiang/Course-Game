@@ -27,9 +27,9 @@ async function main(): Promise<void> {
     let finished_marker: HTMLImageElement = await loadImage(window.finished_marker);
     let unfinished_marker: HTMLImageElement = await loadImage(window.unfinished_marker);
 
-    let sessions: Array<{position: Rect; get: {[props: string]: any}}> = [];
+    let sessions: Array<{position: Rect; get: {[props: string]: any}; name: string}> = [];
     for (let item of window.sessions) {
-        sessions.push({position: new Rect(...item.position), get: item.get});
+        sessions.push({position: new Rect(...item.position), get: item.get, name: item.name});
     }
     window.sessions = [];
 

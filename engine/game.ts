@@ -266,13 +266,28 @@ export class Game {
 
         for (let i = 0; i < this.course.sessions.length; i++) {
             let marker: Marker;
+            let session: {position: Rect; get: AnyObject; name: string} = this.course.sessions[i];
             if (i < this.game_progress.session) {
-                marker = new Marker(this.course.finished_marker, this.course.sessions[i].position);
+                marker = new Marker(this.course.finished_marker, session.position);
             } else if (i == this.game_progress.session) {
-                marker = new Marker(this.course.unfinished_marker, this.course.sessions[i].position);
+                marker = new Marker(this.course.unfinished_marker, session.position);
             } else {
                 continue;
             }
+
+            let level_text_size = this.height * 0.015;
+            let level_text_max_width = level_text_size * 10;
+            let level_text_height = level_text_size * 3;
+            let level_text_background_rect: Rect = new Rect(
+                session.position.x + session.position.width / 2 - level_text_max_width / 2,
+                session.position.y - level_text_height * 1.2,
+                level_text_max_width,
+                level_text_height
+            );
+            this.renderer.draw(new Fill(level_text_background_rect, 'rgba(0, 0, 0, 0.5)'));
+            this.renderer.draw(
+                new CenteredText(this.course.sessions[i].name, level_text_background_rect, '#FFFFFF', level_text_size)
+            );
 
             marker.onclick = async () => {
                 if (typeof this.game_content[i] == 'undefined') {
@@ -937,7 +952,7 @@ export type Course = {
     map: HTMLImageElement;
     finished_marker: HTMLImageElement;
     unfinished_marker: HTMLImageElement;
-    sessions: Array<{position: Rect; get: AnyObject}>;
+    sessions: Array<{position: Rect; get: AnyObject; name: string}>;
 };
 
 export type Progress = {
