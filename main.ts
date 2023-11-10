@@ -1,5 +1,4 @@
-import {Course} from './engine/game';
-import {Game} from './engine/game';
+import {Course, Game} from './engine/game';
 import {Rect} from './engine/geometry';
 import {loadImage, Loading, BrowserValidator} from './engine/util';
 
@@ -55,7 +54,7 @@ declare global {
         game_map: string;
         finished_marker: string;
         unfinished_marker: string;
-        sessions: Array<{position: [number, number, number, number, number]; get: object}>;
+        sessions: Array<{position: [number, number, number, number, number]; get: object; name: string}>;
         static_url: string;
         image_list: Array<string | [string, boolean]>;
     }

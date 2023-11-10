@@ -27,7 +27,10 @@ import PlayBar from './images/play-bar.png';
 import {Drag} from './component/drag';
 
 export class Game {
-    constructor(private course: Course, private parent: HTMLElement = document.body) {
+    constructor(
+        private course: Course,
+        private parent: HTMLElement = document.body
+    ) {
         this.parent.classList.add('cg-game');
 
         let scale: number;
@@ -607,7 +610,7 @@ export class Game {
         let timer: Timer;
         if (!is_replaying) {
             timer = new Timer(
-                first_attempt ? 10: 5,
+                first_attempt ? 10 : 5,
                 new Rect(this.width * 0.14, this.height * 0.045, -1, this.height * 0.065)
             );
             this.renderer.draw(timer);
@@ -738,7 +741,7 @@ export class Game {
                 this.renderer.render();
             }
         };
-        
+
         // Make sure to set this every time, despite the fact that this field might have already been set
         // This is due to the deep-copy issue involved in the function, and if we do not reset this every time, the game
         // would some how return to the previous point, causing weird bugs
@@ -772,7 +775,9 @@ export class Game {
                 }
             };
 
-            this.alert_modal.querySelector('.cg-game-alert-confirm').addEventListener('click', modal_callback, {once: true});
+            this.alert_modal
+                .querySelector('.cg-game-alert-confirm')
+                .addEventListener('click', modal_callback, {once: true});
         }
     }
 
