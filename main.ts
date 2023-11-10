@@ -9,7 +9,7 @@ async function main(): Promise<void> {
             match: function (user_agent: string) {
                 return /safari/.test(user_agent) && !/chrome/.test(user_agent);
             },
-            error: '小游戏目前不支持 Safari 浏览器，可以使用 chrome 浏览器',
+            error: '小游戏暂时不支持 Safari 浏览器，请使用 Chrome 或 Edge 等浏览器代替',
         },
     ]);
     if (browser_validator.browser_is_banned()) {
