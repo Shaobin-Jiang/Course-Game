@@ -1,9 +1,21 @@
-import {Course} from './engine/game';
-import {Game} from './engine/game';
+import {Course, Game} from './engine/game';
 import {Rect} from './engine/geometry';
-import {loadImage, Loading} from './engine/util';
+import {loadImage, Loading, BrowserValidator} from './engine/util';
 
 async function main(): Promise<void> {
+    let browser_validator = new BrowserValidator([
+        {
+            match: function (user_agent: string) {
+                return /safari/.test(user_agent) && !/chrome/.test(user_agent);
+            },
+            error: '小游戏暂时不支持 Safari 浏览器，请使用 Chrome 或 Edge 等浏览器代替',
+        },
+    ]);
+    if (browser_validator.browser_is_banned()) {
+        alert(browser_validator.error_message);
+        return;
+    }
+
     new Loading();
 
     if (typeof window.image_list != 'undefined') {
@@ -14,9 +26,9 @@ async function main(): Promise<void> {
     let finished_marker: HTMLImageElement = await loadImage(window.finished_marker);
     let unfinished_marker: HTMLImageElement = await loadImage(window.unfinished_marker);
 
-    let sessions: Array<{position: Rect; get: {[props: string]: any}}> = [];
+    let sessions: Array<{position: Rect; get: {[props: string]: any}; name: string}> = [];
     for (let item of window.sessions) {
-        sessions.push({position: new Rect(...item.position), get: item.get});
+        sessions.push({position: new Rect(...item.position), get: item.get, name: item.name});
     }
     window.sessions = [];
 
@@ -42,7 +54,7 @@ declare global {
         game_map: string;
         finished_marker: string;
         unfinished_marker: string;
-        sessions: Array<{position: [number, number, number, number, number]; get: object}>;
+        sessions: Array<{position: [number, number, number, number, number]; get: object; name: string}>;
         static_url: string;
         image_list: Array<string | [string, boolean]>;
     }

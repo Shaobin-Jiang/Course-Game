@@ -27,7 +27,10 @@ import PlayBar from './images/play-bar.png';
 import {Drag} from './component/drag';
 
 export class Game {
-    constructor(private course: Course, private parent: HTMLElement = document.body) {
+    constructor(
+        private course: Course,
+        private parent: HTMLElement = document.body
+    ) {
         this.parent.classList.add('cg-game');
 
         let scale: number;
@@ -266,13 +269,28 @@ export class Game {
 
         for (let i = 0; i < this.course.sessions.length; i++) {
             let marker: Marker;
+            let session: {position: Rect; get: AnyObject; name: string} = this.course.sessions[i];
             if (i < this.game_progress.session) {
-                marker = new Marker(this.course.finished_marker, this.course.sessions[i].position);
+                marker = new Marker(this.course.finished_marker, session.position);
             } else if (i == this.game_progress.session) {
-                marker = new Marker(this.course.unfinished_marker, this.course.sessions[i].position);
+                marker = new Marker(this.course.unfinished_marker, session.position);
             } else {
                 continue;
             }
+
+            let level_text_size = this.height * 0.015;
+            let level_text_max_width = level_text_size * 10;
+            let level_text_height = level_text_size * 3;
+            let level_text_background_rect: Rect = new Rect(
+                session.position.x + session.position.width / 2 - level_text_max_width / 2,
+                session.position.y - level_text_height * 1.2,
+                level_text_max_width,
+                level_text_height
+            );
+            this.renderer.draw(new Fill(level_text_background_rect, 'rgba(0, 0, 0, 0.5)'));
+            this.renderer.draw(
+                new CenteredText(this.course.sessions[i].name, level_text_background_rect, '#FFFFFF', level_text_size)
+            );
 
             marker.onclick = async () => {
                 if (typeof this.game_content[i] == 'undefined') {
@@ -592,7 +610,7 @@ export class Game {
         let timer: Timer;
         if (!is_replaying) {
             timer = new Timer(
-                first_attempt ? 10: 5,
+                first_attempt ? 10 : 5,
                 new Rect(this.width * 0.14, this.height * 0.045, -1, this.height * 0.065)
             );
             this.renderer.draw(timer);
@@ -723,7 +741,7 @@ export class Game {
                 this.renderer.render();
             }
         };
-        
+
         // Make sure to set this every time, despite the fact that this field might have already been set
         // This is due to the deep-copy issue involved in the function, and if we do not reset this every time, the game
         // would some how return to the previous point, causing weird bugs
@@ -757,7 +775,9 @@ export class Game {
                 }
             };
 
-            this.alert_modal.querySelector('.cg-game-alert-confirm').addEventListener('click', modal_callback, {once: true});
+            this.alert_modal
+                .querySelector('.cg-game-alert-confirm')
+                .addEventListener('click', modal_callback, {once: true});
         }
     }
 
@@ -794,6 +814,18 @@ export class Game {
                 this.is_showing_menu = false;
             };
             close.addEventListener('click', close_callback, {once: true});
+
+            let index: HTMLDivElement = document.createElement('div');
+            index.className = 'menu-option';
+            index.innerText = '返回首页';
+            modal.appendChild(index);
+
+            let index_callback = () => {
+                modal.remove();
+                this.is_showing_menu = false;
+                window.location.href = '/';
+            };
+            index.addEventListener('click', index_callback, {once: true});
 
             let about: HTMLDivElement = document.createElement('div');
             about.className = 'menu-option';
@@ -925,7 +957,7 @@ export type Course = {
     map: HTMLImageElement;
     finished_marker: HTMLImageElement;
     unfinished_marker: HTMLImageElement;
-    sessions: Array<{position: Rect; get: AnyObject}>;
+    sessions: Array<{position: Rect; get: AnyObject; name: string}>;
 };
 
 export type Progress = {
