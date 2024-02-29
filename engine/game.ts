@@ -363,6 +363,22 @@ export class Game {
             return;
         }
 
+        let content: Session = this.game_content[session_id];
+        let scene = game_progress.scene;
+        let max_scene = content.levels[level_id].scenes.length;
+        let max_level = content.levels.length;
+        if (scene >= max_scene) {
+            level_id++;
+            if (level_id >= max_level) {
+                level_id = 0;
+                session_id++;
+            }
+            game_progress.scene = 0;
+            game_progress.level = level_id;
+            game_progress.session = session_id;
+            this.update_progress(game_progress, []);
+        }
+
         let session: Session = this.game_content[session_id];
         let level: Level = session.levels[level_id];
 
